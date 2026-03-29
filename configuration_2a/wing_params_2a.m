@@ -10,22 +10,22 @@
 %% basic parameters
 
 % wing span (scalar), in m
-prm.b         	= 27.05;
+prm.b         	= 27;
 % is the wing symmetrical to the xz-plane (scalar bolean)?
 prm.is_symmetrical = true;
 
 %% wing segments (s segments)
 
 % spanwise coordinates of wing parts (1x(s+1) array), in -
-prm.eta_segments_wing = [0,0.463,1];
+prm.eta_segments_wing = [0,6.5/13.5,1];
 % wing chord (1x(s+1) array), in m
-prm.c           = [2.45,2.3,1.34];
+prm.c           = [2.45,2.45,1.337];
 % quarter chord line sweepback angle for each section (1xs array), in rad
-prm.lambda    	= [-sin((0.25*(2.45-2.3))/(0.463*prm.b/2)),-sin((0.25*(2.3-1.34))/(0.537*prm.b/2))];
+prm.lambda    	= [0,-0.04];
 % wing section twist with respect to root (1xs array), in rad
 prm.epsilon   	= deg2rad([0,0]);
 % dihedral angle (abs(nu)<pi/2 !) for each section (1xs array), in rad
-prm.nu       	= deg2rad([0,0]); 
+prm.nu       	= [deg2rad(90)-1.56,deg2rad(90)-1.57]; 
 
 %% wing device segments (d device segments)
 
@@ -48,10 +48,10 @@ prm.control_input_index = [ 0, 1, 0, 0, 1, 0, 0, 0, 0, 0; ...
 %% coordinates in reference frame
 
 % wing incidence relative x-y-plane of reference frame, in rad
-prm.i = deg2rad(0);
+prm.i = 0.05;
 % wing rotation about x axis of reference frame, in rad
 prm.rot_x = 0;
 % x position of the wing (leading edge at wing root) in reference frame (scalar), in m
 prm.x = -14.38; 
 % z position of the wing (leading edge at wing root) in reference frame (scalar), in m
-prm.z = -1.5;
+prm.z = -1.49;

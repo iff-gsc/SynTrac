@@ -21,11 +21,11 @@ prm.eta_segments_wing = [0,1];
 % wing chord (1x(s+1) array), in m
 prm.c           = [1.8,1.1];
 % quarter chord line sweepback angle for each section (1xs array), in rad
-prm.lambda    	= [1.5708-1.39];
+prm.lambda    	= [deg2rad(90)-1.39];
 % wing section twist with respect to root (1xs array), in rad
-prm.epsilon   	= deg2rad([0]);
+prm.epsilon   	= [-0.05];
 % dihedral angle (abs(nu)<pi/2 !) for each section (1xs array), in rad
-prm.nu       	= [0.07]; 
+prm.nu       	= [1.64-deg2rad(90)]; 
 
 %% wing device segments (d device segments)
 
@@ -36,7 +36,7 @@ prm.eta_segments_device = [0,1];
 %   2) "airfoilAnalytic0515..." (see airfoilAnalytic0515LoadParams) <-- good luck!
 prm.section = char(repmat(["airfoilAnalyticSimple_params_default"],3,1));
 % relative flap depth for each device segment (1xd array), in -
-prm.flap_depth          = [0,0];
+prm.flap_depth          = [0.38];
 % second actuator type (dx? char array); available options:
 %   1) "none" no second actuator
 %   2) "airfoilMicroTab..." (see airfoilMicroTabLoadParams)

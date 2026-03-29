@@ -3,7 +3,12 @@
 htp_2a
 close(1)
 close(2)
+vtp_2a
+close (1)
+close (2)
 wing_2a
 close(2)
 hold on
 wingPlotGeometry(htp,3)
+hold on
+wingPlotGeometry(vtp,3)
