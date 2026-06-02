@@ -9,3 +9,8 @@
 *.pdf
 *.run.xml
 *.log
+
+*.asv
+*.m~
+*slprj/
+*.slxc

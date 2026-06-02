@@ -7,17 +7,20 @@
 %   Copyright (C) 2022 TU Braunschweig, Institute of Flight Guidance
 % *************************************************************************
 
+addPathConfig2a();
+
 %% Create vortex lattice method wing
-wing = wingCreate('wing_params_2a',20);
+wing = wingCreate('wing_params_2a',40);
 
 %% define current wing state
 
 % define current rigid body state
-alpha = deg2rad(2);
+alpha = deg2rad(0);
 beta = deg2rad(0);
-V = 20;
+h = ft2m(22000);
+atm = isAtmosphere(h);
+V = atm.a*0.44;
 omega = [0;0;0];
-h = 0;
 
 % cg position in wing coordinate system
 % xyz_cg = zeros(3,1);

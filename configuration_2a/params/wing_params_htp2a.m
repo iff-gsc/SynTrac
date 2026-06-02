@@ -1,4 +1,4 @@
-% Wing parameters (default)
+% Wing parameters (SynTrac configuration 2a HTP)
 
 % Disclaimer:
 %   SPDX-License-Identifier: GPL-3.0-only
@@ -23,7 +23,7 @@ prm.c           = [1.8,1.1];
 % quarter chord line sweepback angle for each section (1xs array), in rad
 prm.lambda    	= [deg2rad(90)-1.39];
 % wing section twist with respect to root (1xs array), in rad
-prm.epsilon   	= [-0.05];
+prm.epsilon   	= deg2rad(4);
 % dihedral angle (abs(nu)<pi/2 !) for each section (1xs array), in rad
 prm.nu       	= [1.64-deg2rad(90)]; 
 
@@ -34,7 +34,7 @@ prm.eta_segments_device = [0,1];
 % section name (dx? char array); two airfoil projects available:
 %   1) "airfoilAnalyticSimple..." (see airfoilAnalyticSimpleCreate) <-- recommended!
 %   2) "airfoilAnalytic0515..." (see airfoilAnalytic0515LoadParams) <-- good luck!
-prm.section = char(repmat(["airfoilAnalyticSimple_params_default"],3,1));
+prm.section = char(repmat(["airfoilAnalyticSimple_params_htp2a"],3,1));
 % relative flap depth for each device segment (1xd array), in -
 prm.flap_depth          = [0.38];
 % second actuator type (dx? char array); available options:
@@ -48,7 +48,7 @@ prm.control_input_index = [ 0, 1, 0, 0, 1, 0, 0, 0, 0, 0; ...
 %% coordinates in reference frame
 
 % wing incidence relative x-y-plane of reference frame, in rad
-prm.i = [0.03];
+prm.i = deg2rad(2);
 % wing rotation about x axis of reference frame, in rad
 prm.rot_x = 0;
 % x position of the wing (leading edge at wing root) in reference frame (scalar), in m

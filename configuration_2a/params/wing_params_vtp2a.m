@@ -1,4 +1,4 @@
-% Wing parameters (default)
+% Wing parameters (SynTrac configuration 2a VTP)
 
 % Disclaimer:
 %   SPDX-License-Identifier: GPL-3.0-only
@@ -34,7 +34,7 @@ prm.eta_segments_device = [0,1];
 % section name (dx? char array); two airfoil projects available:
 %   1) "airfoilAnalyticSimple..." (see airfoilAnalyticSimpleCreate) <-- recommended!
 %   2) "airfoilAnalytic0515..." (see airfoilAnalytic0515LoadParams) <-- good luck!
-prm.section = char(repmat(["airfoilAnalyticSimple_params_default"],3,1));
+prm.section = char(repmat(["airfoilAnalyticSimple_params_vtp2a"],3,1));
 % relative flap depth for each device segment (1xd array), in -
 prm.flap_depth          = [0.39];
 % second actuator type (dx? char array); available options:
