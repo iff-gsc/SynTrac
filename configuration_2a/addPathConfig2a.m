@@ -4,8 +4,10 @@ this_file_path = fileparts(mfilename('fullpath'));
 cd(this_file_path);
 addpath(genpath(this_file_path));
 cd ..
-addpath(genpath('modules'));
 addpath(genpath('functions'));
+addpath(genpath('library'));
+addpath(genpath('models'));
+addpath(genpath('modules'));
 cd(this_file_path);
 addpath(genpath('params'));
 addpath(genpath('data'));
