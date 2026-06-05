@@ -65,6 +65,8 @@ for i = 1:length(prop)
     prop(i).RPM = 1225;
 end
 
+prop_table = xprop_load_table('data/xprop_data.mat');
+
 %% actuator dynamics
 act = loadParams('actuators_params_syntrac');
 
@@ -76,8 +78,10 @@ aircraft.wing_vtp = wing_vtp;
 % aircraft.fuselage = fuselage;
 aircraft.downwash = downwash;
 aircraft.prop = prop;
+aircraft.prop_table = prop_table;
 aircraft.actuators = act;
 aircraft.config = config;
 aircraft.vtp_sideslip_factor = 1.7;
+
 
 end
