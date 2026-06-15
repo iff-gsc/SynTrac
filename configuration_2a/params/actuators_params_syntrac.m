@@ -43,7 +43,7 @@ param.prop_pitch.omega = 10;
 param.prop_pitch.D = 1;
 % maximum deflections 
 param.prop_pitch.defl_max = deg2rad(15);
-param.prop_pitch.defl_min = deg2rad(15);
+param.prop_pitch.defl_min = -deg2rad(15);
 % maximum pitch rates
 param.prop_pitch.defl_rate_max =  deg2rad(20);
 param.prop_pitch.defl_rate_min = -deg2rad(20);
