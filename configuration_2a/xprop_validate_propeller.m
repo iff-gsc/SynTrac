@@ -9,7 +9,7 @@ if ~isfile(mat)
     xprop_build_matfile(txt, mat);
 end
 [tbl, tbl_bus, tbl_meta] = xprop_load_table(mat);
-return
+%return
 %% ---- Reference conditions -----------------------------------------------
 rho     = 0.609542;
 RPM     = 1225;
@@ -190,11 +190,20 @@ legend('Location','bestoutside','FontSize',6,'NumColumns',2);
 
 
 %% ===== Example operating point ===========================================
+% Defined once as variables so the same point feeds the printout AND the
+% swirl figure below.
+RPM_ex  = 1225;
+beta_ex = 5;          % pitch_delta            [deg]
+V_ex    = 110;         % flight speed           [m/s]
+rho_ex  = 0.609542;   % air density            [kg/m^3]
+R       = D / 2;      % rotor radius (D from Reference conditions)   [m]
+
 fprintf('\n========== EXAMPLE OPERATING POINT ==========\n');
-[T,Q,P,vi,v_sw,Ct,Cp,J,eff] = propeller_aero(tbl, 1225, 5, 60, 0.609542);
+[T,Q,P,vi,v_sw,Ct,Cp,J,eff] = propeller_aero(tbl, RPM_ex, beta_ex, V_ex, rho_ex);
 [dT_dbeta,dQ_dbeta,dvi_dbeta,dT_dV,dQ_dV,dvi_dV] = ...
-    propeller_derivatives(tbl, 1225, 5, 60, 0.609542);
-fprintf('RPM=1225  pitch_delta=+5 deg  V=60 m/s  rho=0.609542 kg/m3\n');
+    propeller_derivatives(tbl, RPM_ex, beta_ex, V_ex, rho_ex);
+fprintf('RPM=%d  pitch_delta=%+d deg  V=%g m/s  rho=%g kg/m3\n', ...
+        RPM_ex, beta_ex, V_ex, rho_ex);
 fprintf('  J    = %.4f\n',  J);
 fprintf('  Ct   = %.5f\n',  Ct);
 fprintf('  Cp   = %.5f\n',  Cp);
@@ -213,3 +222,38 @@ fprintf('  dT/dV  = %.2f N/(m/s)\n',       dT_dV);
 fprintf('  dQ/dV  = %.3f N·m/(m/s)\n',     dQ_dV);
 fprintf('  dvi/dV = %.4f (m/s)/(m/s)\n',   dvi_dV);
 fprintf('==============================================\n');
+
+%% ===== FIGURE 9: Propeller swirl at the example operating point ==========
+% Reuses Q and vi from the operating point above (no recomputation).
+s_dev  = 0.5;                    % wake development: 0 = at disk, 1 = far wake
+v_disk = V_ex + vi;              % throughflow at the disk (sets swirl magnitude)
+v_wing = V_ex + (1 + s_dev)*vi;  % velocity the wing sees (AoA conversion)
+
+y = linspace(-R, R, 201);        % spanwise stations, +y = right wing   [m]
+[omega_s, w_theta, delta_alpha] = inducedSwirl(Q, v_disk, v_wing, R, rho_ex, y);
+da_deg = delta_alpha * 180/pi;
+
+figure('Name','Propeller swirl at example point','Position',[650 100 1000 400]);
+
+subplot(1,2,1); hold on; grid on;
+plot(y, w_theta, 'LineWidth', 2.0, 'Color', [0.12 0.37 0.66]);
+yline(0,'k:'); xline(0,'k:');
+xlabel('spanwise position  y  [m]   (+y = right wing)');
+ylabel('swirl velocity  w_\theta  [m/s]   (+ = downward)');
+title('Additional (swirl) flow velocity');
+
+subplot(1,2,2); hold on; grid on;
+plot(y, da_deg, 'LineWidth', 2.0, 'Color', [0.75 0.22 0.17]);
+yline(0,'k:'); xline(0,'k:');
+xlabel('spanwise position  y  [m]   (+y = right wing)');
+ylabel('\Delta\alpha  [deg]');
+title('Induced change in angle of attack');
+text(-0.55*R, max(da_deg)*0.55, {'left wing:','\alpha increased'}, ...
+     'HorizontalAlignment','center','FontSize',8,'Color',[0.12 0.37 0.66]);
+text( 0.55*R, min(da_deg)*0.55, {'right wing:','\alpha reduced'}, ...
+     'HorizontalAlignment','center','FontSize',8,'Color',[0.75 0.22 0.17]);
+
+sgtitle(sprintf(['Propeller swirl on the wing   —   ' ...
+    'RPM=%d, \\Delta\\beta=%+d°, V=%.0f m/s, \\rho=%.3f kg/m^3   ' ...
+    '(Q=%.0f N\\cdotm, v_i=%.2f m/s)'], ...
+    RPM_ex, beta_ex, V_ex, rho_ex, Q, vi));
