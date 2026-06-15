@@ -54,6 +54,11 @@ prop(7).pos_c = [ 13.186;   +5.604;   1.833 ];
 prop(8).pos_c = [ 13.186;   +8.236;   1.833 ];
 prop(9).pos_c = [ 13.186;   +10.868;  1.833 ];
 prop(10).pos_c = [ 13.186;  +13.500;  1.833 ];
+
+% From A03: The orientation is inward up.
+% So, the propeller's part close to the fuselage is going up.
+% If you look at the left half of the aircraft coming towards you,
+% it is counter-clockwise. 
 for i = 1:length(prop)
     prop(i).angle = deg2rad(-5);
     prop(i).diameter = 2.35;
