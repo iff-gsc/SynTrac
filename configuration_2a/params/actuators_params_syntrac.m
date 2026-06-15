@@ -36,14 +36,17 @@ param.aileron.defl_rate_max = infEmb;
 param.aileron.defl_rate_min = -infEmb;
 
 % natural frequency propeller pitch
-param.prop_pitch.omega = 30;
+% PT2 critically damped (D=1), time constant tau is approx. 2/omega_n
+% Target tau = 0.2s -> omega_n = 2/0.2 = 10 rad/s
+param.prop_pitch.omega = 10;
 % damping ratio propeller pitch
 param.prop_pitch.D = 1;
-% maximum deflections and deflection rates propeller pitch
-param.prop_pitch.defl_max = deg2rad(90);
-param.prop_pitch.defl_min = deg2rad(-30);
-param.prop_pitch.defl_rate_max = infEmb;
-param.prop_pitch.defl_rate_min = -infEmb;
+% maximum deflections 
+param.prop_pitch.defl_max = deg2rad(15);
+param.prop_pitch.defl_min = deg2rad(15);
+% maximum pitch rates
+param.prop_pitch.defl_rate_max =  deg2rad(20);
+param.prop_pitch.defl_rate_min = -deg2rad(20);
 
 % htp trim dynamics
 param.htp_trim.omega = 1;
