@@ -7,15 +7,18 @@ default_n_panel_htp = 16;
 default_n_panel_vtp = 8;
 % default_n_seg_fuse = 15;
 default_mass_case = 'MTOM';
+default_prop_config = 'Inner';
 
 valid_panel_number = @(x) isnumeric(x) && isscalar(x) && (x>1) && (mod(x,1)==0);
 valid_mass_case = @(x) ischar(x) && ismember(x, {'MTOM','OEM'});
+valid_prop_config = @(x) ischar(x) && ismember(x, {'Inner','Outer'});
 
 addParameter(p,'NumPanelWing',default_n_panel_wing,valid_panel_number);
 addParameter(p,'NumPanelHtp',default_n_panel_htp,valid_panel_number);
 addParameter(p,'NumPanelVtp',default_n_panel_vtp,valid_panel_number);
 % addParameter(p,'NumSegFuse',default_n_seg_fuse,valid_panel_number);
-addParameter(p,'MassCase',default_mass_case,valid_mass_case)
+addParameter(p,'MassCase',default_mass_case,valid_mass_case);
+addParameter(p,'PropConfig',default_prop_config,valid_prop_config);
 
 parse(p,varargin{:})
 
@@ -44,16 +47,29 @@ downwash.C_Lalpha = -derivs.alpha(3);
 downwash.C_Leta = -derivs.eta(3,:);
 
 %% propellers
-prop(1).pos_c = [ 13.186;   -13.500;  1.833 ];
-prop(2).pos_c = [ 13.186;   -10.868;  1.833 ];
-prop(3).pos_c = [ 13.186;   -8.236;   1.833 ];
-prop(4).pos_c = [ 13.186;   -5.604;   1.833 ];
-prop(5).pos_c = [ 13.186;   -2.972;   1.833 ];
-prop(6).pos_c = [ 13.186;   +2.972;   1.833 ];
-prop(7).pos_c = [ 13.186;   +5.604;   1.833 ];
-prop(8).pos_c = [ 13.186;   +8.236;   1.833 ];
-prop(9).pos_c = [ 13.186;   +10.868;  1.833 ];
-prop(10).pos_c = [ 13.186;  +13.500;  1.833 ];
+if strcmp(p.Results.PropConfig, 'Inner')
+    prop(1).pos_c = [ 13.189;   -13.003;  1.793 ];
+    prop(2).pos_c = [ 13.189;   -10.371;  1.793 ];
+    prop(3).pos_c = [ 13.189;   -7.739;   1.793 ];
+    prop(4).pos_c = [ 13.189;   -5.107;   1.793 ];
+    prop(5).pos_c = [ 13.189;   -2.475;   1.793 ];
+    prop(6).pos_c = [ 13.189;   +2.475;   1.793 ];
+    prop(7).pos_c = [ 13.189;   +5.107;   1.793 ];
+    prop(8).pos_c = [ 13.189;   +7.739;   1.793 ];
+    prop(9).pos_c = [ 13.189;   +10.371;  1.793 ];
+    prop(10).pos_c = [ 13.189;  +13.003;  1.793 ];
+elseif strcmp(p.Results.PropConfig, 'Outer')
+    prop(1).pos_c = [ 13.186;   -13.500;  1.833 ];
+    prop(2).pos_c = [ 13.186;   -10.868;  1.833 ];
+    prop(3).pos_c = [ 13.186;   -8.236;   1.833 ];
+    prop(4).pos_c = [ 13.186;   -5.604;   1.833 ];
+    prop(5).pos_c = [ 13.186;   -2.972;   1.833 ];
+    prop(6).pos_c = [ 13.186;   +2.972;   1.833 ];
+    prop(7).pos_c = [ 13.186;   +5.604;   1.833 ];
+    prop(8).pos_c = [ 13.186;   +8.236;   1.833 ];
+    prop(9).pos_c = [ 13.186;   +10.868;  1.833 ];
+    prop(10).pos_c = [ 13.186;  +13.500;  1.833 ];
+end
 
 % From A03: The orientation is inward up.
 % So, the propeller's part close to the fuselage is going up.
