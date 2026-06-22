@@ -42,8 +42,8 @@ prm.flap_depth          = [0.38];
 %   2) "airfoilMicroTab..." (see airfoilMicroTabLoadParams)
 prm.actuator_2_type = char(repmat(["none"],3,1));
 % index of the control input (0 means no control input) (1x(2*d) array), in -  
-prm.control_input_index = [ 0, 1, 0, 0, 1, 0, 0, 0, 0, 0; ...
-                            zeros(1,10) ];
+prm.control_input_index = [ 1, 1; ...
+                            0, 0 ];
 
 %% coordinates in reference frame
 

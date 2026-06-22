@@ -17,16 +17,17 @@ prm.is_symmetrical = true;
 %% wing segments (s segments)
 
 % spanwise coordinates of wing parts (1x(s+1) array), in -
-prm.eta_segments_wing = [0,6.5/13.5,1];
+prm.eta_segments_wing = [0,0.06,6.5/13.5,1];
 % wing chord (1x(s+1) array), in m
-prm.c           = [2.45,2.45,1.337];
+prm.c           = [2.45,2.45,2.45,1.337];
 % quarter chord line sweepback angle for each section (1xs array), in rad
-prm.lambda    	= [0,-0.04];
+prm.lambda    	= [0,0,-0.04];
 % wing section twist with respect to root (1xs array), in rad
 % prm.epsilon   	= deg2rad([-1,-3.3]);
-prm.epsilon     = deg2rad([0,0]);
+prm.epsilon     = deg2rad([0,0,0]);
+prm.epsilon     = deg2rad([3.091,2.25,0.0984]);
 % dihedral angle (abs(nu)<pi/2 !) for each section (1xs array), in rad
-prm.nu       	= [deg2rad(90)-1.56,deg2rad(90)-1.57]; 
+prm.nu       	= [0,0,0]; 
 
 %% wing device segments (d device segments)
 
@@ -50,7 +51,7 @@ prm.control_input_index = [ 0, 1, 0, 0, 2, 0; ...
 
 % wing incidence relative x-y-plane of reference frame, in rad
 % prm.i = deg2rad(3.32);
-prm.i = deg2rad(1);
+prm.i = deg2rad(0);
 % wing rotation about x axis of reference frame, in rad
 prm.rot_x = 0;
 % x position of the wing (leading edge at wing root) in reference frame (scalar), in m
