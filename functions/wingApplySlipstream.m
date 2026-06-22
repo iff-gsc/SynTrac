@@ -1,0 +1,62 @@
+function V_Wb = wingApplySlipstream( wing, prop_y_pos, prop_ang, ...
+                    prop_d, v_i, V, rho, Q, prop_dir )
+% wingAppySlipstream computes the wind at each panel created by propellers
+% in front of the wing. Two effects are considered: Induced velocity and
+% swirl
+% 
+% Inputs:
+%   wing            wing struct, see wingCreate
+%   prop_y_pos      Spanwise positions of the propeller centers (1xN_p
+%                   array, where N_p is the number of propellers), in m
+%   prop_ang        Incidence angles of the propellers, where negative
+%                   values mean downward looking propellers (1xN_p array),
+%                   in rad
+%   prop_d          Propeller diameters (1xN_p array), in m
+%   v_i             Induced velocities of each propeller at the propeller
+%                   disk (1xN_p array), in m/s
+%   V               Airspeed at each propeller (1xN_p array), in m/s
+%   rho             Air density (scalar), in kg/m^3
+%   Q               Propeller torques (1xN_p array), in Nm
+%   prop_dir        Propeller directions of rotation (1xN_p array)
+%                       1:  clockwise seen from behind the aircraft
+%                       -1: counter-clockwise seen from behind the wing
+% 
+% Outputs:
+%   V_Wb            Additional airspeed vector at each panel of the wing in
+%                   body frame (FRD) (3xN_panel array), in m/s
+% 
+% See also:
+%   wingCreate, wingPlotGeometry, wingSetState
+
+% Disclaimer:
+%   SPDX-License-Identifier: GPL-3.0-only
+% 
+%   Copyright (C) 2026 Yannic Beyer
+%   Copyright (C) 2026 TU Braunschweig, Institute of Flight Guidance
+% *************************************************************************
+
+V_Wb = zeros( 3, wing.n_panel );
+r_eval = zeros( 1, wing.n_panel );
+
+n_props = length(prop_y_pos);
+for i = 1:n_props
+    % Apply slipstream to full propeller diameter (instead of 0.7*d)
+    % because it compared better to CFD results
+    y_l = prop_y_pos(i) - prop_d(i)/2;
+    y_r = prop_y_pos(i) + prop_d(i)/2;
+    is_slip = wing.geometry.ctrl_pt.pos(2,:) > y_l & ...
+        wing.geometry.ctrl_pt.pos(2,:) < y_r;
+    V_Wb(1,is_slip) = -v_i(i)*cos(prop_ang(i));
+    r_eval(is_slip) = wing.geometry.ctrl_pt.pos(2,is_slip) - prop_y_pos(i);
+    v_disk = v_i(i) + V(i);
+    % Don't use 2*v_i because it compared better to CFD results
+    v_wing = v_i(i) + V(i);
+    % Slightly increase torque because it compared better to CFD results
+    Qmod = 1.3; 
+    [~, V_Wb(3,is_slip), ~] = ...
+            inducedSwirl( -prop_dir(i)*Qmod*Q(i), v_disk, v_wing, ...
+            prop_d(i)/2, rho, r_eval(is_slip));
+    V_Wb(3,is_slip) = V_Wb(3,is_slip) + v_i(i)*sin(prop_ang(i));
+end
+
+end
