@@ -2,7 +2,7 @@ function aircraft = aircraftSyntracCreate( varargin )
 
 p = inputParser;
 
-default_n_panel_wing = 40;
+default_n_panel_wing = 58;
 default_n_panel_htp = 16;
 default_n_panel_vtp = 8;
 % default_n_seg_fuse = 15;
@@ -34,17 +34,6 @@ end
 %% configuration parameters
 % center of gravity in body-fixed c frame (NED located at the nose)
 config.xyz_cg_c = [ -14.79; 0; 0 ];
-
-%% aerodynamics
-wing_main = wingCreate( 'wing_params_2a', p.Results.NumPanelWing );
-wing_htp = wingCreate( 'wing_params_htp2a', p.Results.NumPanelHtp );
-wing_vtp = wingCreate( 'wing_params_vtp2a', p.Results.NumPanelVtp );
-
-%% wing downwash
-downwash = wingGetDownwashDerivs( wing_main, wing_htp );
-derivs = wingGetDerivs(wing_main);
-downwash.C_Lalpha = -derivs.alpha(3);
-downwash.C_Leta = -derivs.eta(3,:);
 
 %% propellers
 if strcmp(p.Results.PropConfig, 'Inner')
@@ -87,6 +76,29 @@ for i = 1:length(prop)
 end
 
 prop_table = xprop_load_table('data/xprop_data.mat');
+
+%% aerodynamics
+wing_params = wingLoadParameters( 'wing_params_2a' );
+eta_edges = [];
+p_per_prop = 4;
+for i = length(prop)/2+1:length(prop)
+    r = prop(i).diameter/2;
+    eta_edges(end+1:end+p_per_prop+1) = ( prop(i).pos_c(2) + ...
+        linspace( -r, r, p_per_prop+1 ) ) ...
+        / (0.5*wing_params.b);
+end
+eta_edges(eta_edges>1) = [];
+eta_edges(eta_edges<0) = [];
+wing_main = wingCreate( 'wing_params_2a', p.Results.NumPanelWing, ...
+    'EtaEdges', eta_edges );
+wing_htp = wingCreate( 'wing_params_htp2a', p.Results.NumPanelHtp );
+wing_vtp = wingCreate( 'wing_params_vtp2a', p.Results.NumPanelVtp );
+
+%% wing downwash
+downwash = wingGetDownwashDerivs( wing_main, wing_htp );
+derivs = wingGetDerivs(wing_main);
+downwash.C_Lalpha = -derivs.alpha(3);
+downwash.C_Leta = -derivs.eta(3,:);
 
 %% actuator dynamics
 act = loadParams('actuators_params_syntrac');
