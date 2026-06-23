@@ -1,5 +1,5 @@
 function V_Wb = wingApplySlipstream( wing, prop_y_pos, prop_ang, ...
-                    prop_d, v_i, V, rho, Q, prop_dir )
+                    prop_d, v_i, swirls )
 % wingAppySlipstream computes the wind at each panel created by propellers
 % in front of the wing. Two effects are considered: Induced velocity and
 % swirl
@@ -35,8 +35,8 @@ function V_Wb = wingApplySlipstream( wing, prop_y_pos, prop_ang, ...
 %   Copyright (C) 2026 TU Braunschweig, Institute of Flight Guidance
 % *************************************************************************
 
-V_Wb = zeros( 3, wing.n_panel );
-r_eval = zeros( 1, wing.n_panel );
+V_Wb = zeros(size(wing.state.external.V_Wb));
+r_eval = zeros( 1, size(V_Wb,2) );
 
 n_props = length(prop_y_pos);
 for i = 1:n_props
@@ -48,14 +48,7 @@ for i = 1:n_props
         wing.geometry.ctrl_pt.pos(2,:) < y_r;
     V_Wb(1,is_slip) = -v_i(i)*cos(prop_ang(i));
     r_eval(is_slip) = wing.geometry.ctrl_pt.pos(2,is_slip) - prop_y_pos(i);
-    v_disk = v_i(i) + V(i);
-    % Don't use 2*v_i because it compared better to CFD results
-    v_wing = v_i(i) + V(i);
-    % Slightly increase torque because it compared better to CFD results
-    Qmod = 1.3; 
-    [~, V_Wb(3,is_slip), ~] = ...
-            inducedSwirl( -prop_dir(i)*Qmod*Q(i), v_disk, v_wing, ...
-            prop_d(i)/2, rho, r_eval(is_slip));
+    V_Wb(3,is_slip) = swirls(i)*r_eval(is_slip)/(prop_d(i)/2);
     V_Wb(3,is_slip) = V_Wb(3,is_slip) + v_i(i)*sin(prop_ang(i));
 end
 

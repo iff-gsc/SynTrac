@@ -8,7 +8,7 @@ AoA = [0,3]; % Available: 0, 0.7, 1, 3
 AoA_offset = -0.4; % Offset of LLT compared to CFD
 
 % Aircraft parameters
-aircraft = aircraftSyntracCreate('NumPanelWing',56);
+aircraft = aircraftSyntracCreate('NumPanelWing',56*2);
 
 % Extract main wing
 wing = aircraft.wing_main;
@@ -35,19 +35,17 @@ pitches = [1,1,1,1,1,1,1,1,1,1]*-1;
 
 %% Run propellers
 
-% Propeller maps
-[T, Q, P, vi, v_slipstream, eff, ...
-          dT_dbeta, dQ_dbeta, dvi_dbeta, ...
-          dT_dV, dQ_dV, dvi_dV] = ...
+% Propeller map
+[T, Q, P, vi, v_slipstream, swirls, eff] = ...
     propeller_model_sfcn( aircraft.prop_table, [aircraft.prop.RPM], ...
-        pitches, repmat(V,size(pitches)), atm.rho );
+        pitches, repmat(V,size(pitches)), atm.rho, [aircraft.prop.diameter]'/2 );
 
 % Propeller slipstream
+swirls_mod = 1.3 * swirls; % Increase swirl for better agreement with CFD
 prop_pos = [aircraft.prop.pos_c];
 prop_y_pos = prop_pos(2,:);
 V_Wb = wingApplySlipstream( wing, prop_y_pos, [aircraft.prop.angle], ...
-    [aircraft.prop.diameter], vi, repmat(V,size(pitches)), atm.rho, Q, ...
-    -[aircraft.prop.dir] );
+    [aircraft.prop.diameter], vi, swirls_mod );
 
 
 %% Compute and plot wing lift and drag distribution for all specified AoA
