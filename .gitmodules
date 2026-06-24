@@ -4,3 +4,6 @@
 [submodule "modules/LADAC-Examples-Data"]
 	path = modules/LADAC-Examples-Data
 	url = https://github.com/iff-gsc/LADAC-Examples-Data
+[submodule "modules/trimmod"]
+	path = modules/trimmod
+	url = https://github.com/se2a-gla/trimmod
