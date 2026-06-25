@@ -45,7 +45,7 @@ swirls_mod = 1.3 * swirls; % Increase swirl for better agreement with CFD
 prop_pos = [aircraft.prop.pos_c];
 prop_y_pos = prop_pos(2,:);
 V_Wb = wingApplySlipstream( wing, prop_y_pos, [aircraft.prop.angle], ...
-    [aircraft.prop.diameter], vi, swirls_mod );
+    [aircraft.prop.diameter], vi, [aircraft.prop.dir]'.*swirls_mod );
 
 
 %% Compute and plot wing lift and drag distribution for all specified AoA
