@@ -148,8 +148,8 @@ if nargout >= 4
     lin.C = jaco(length(i_x_lin)+1:end,i_x_lin);
     lin.D = jaco(length(i_x_lin)+1:end,length(i_x_lin)+(1:length(i_u_lin)));
     lin.StateNames = state_names(i_x_lin);
-    lin.InputNames = input_names(i_u_lin);
-    lin.OutputNames = output_names(i_y_lin);
+    lin.InputNames = input_names(i_u_lin)';
+    lin.OutputNames = output_names(i_y_lin)';
     if nargout == 5
         elim = false(size(lin.A,1),1);
         for i = 1:length(elim)
@@ -165,6 +165,9 @@ if nargout >= 4
         lin_red.B = sys_red.B;
         lin_red.C = sys_red.C;
         lin_red.D = sys_red.D;
+        lin_red.StateNames = lin.StateNames(~elim);
+        lin_red.InputNames = lin.InputNames;
+        lin_red.OutputNames = lin.OutputNames;
     end
 end
 
