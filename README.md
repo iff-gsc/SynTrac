@@ -40,7 +40,9 @@ syntrac/
 │   │   ├── xprop_data.mat   # Preprocessed lookup tables (generated, do not edit)
 │   │   └── aero_validation/ # CFD reference distributions (DLR TAU)
 │   ├── xprop_build_matfile.m  # Step 1 of propeller data pipeline
-│   └── xprop_load_table.m     # Step 2 of propeller data pipeline
+│   ├── xprop_load_table.m     # Step 2 of propeller data pipeline
+│   ├── plot_aircraft_geometry.m  # Plot wing, HTP, and VTP lifting-line geometry in one figure
+│   └── prop_wing_validation.m   # Compare spanwise lift and drag distributions (LLT vs CFD reference data)
 ├── functions/               # Standalone MATLAB functions
 │   ├── propeller_aero.m     # BEM propeller force/moment evaluation
 │   ├── propeller_model_sfcn.m # Simulink S-function wrapper
