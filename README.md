@@ -58,9 +58,56 @@ syntrac/
 │   ├── sim_config2a.slx       # Main simulation model
 │   ├── sim_config2a_trim.slx  # Trim variant (used by trimConfig2a)
 │   └── sim_BEM_propeller.slx  # Stand-alone propeller model
+├── FlightGear/
+│   ├── SynTrac2a/                # Aircraft model for FlightGear
+│   │   ├── SynTrac2a-set.xml     # Aircraft configuration and camera setup
+│   │   └── Model/                # 3D geometry (.ac) and animation definition (.xml)
+│   ├── runfg_SynTrac2a.sh        # Launch script (Linux)
+│   └── runfg_SynTrac2a.bat       # Launch script (Windows)
 └── modules/
     └── LADAC/               # LADAC framework submodule
 ```
+
+---
+
+## FlightGear Visualization
+
+[FlightGear](https://www.flightgear.org/) is used as a real-time 3D visualization companion to the Simulink simulation. FlightGear runs with its own flight dynamics disabled (`--fdm=null`); all motion data come from Simulink via a UDP socket:
+
+- **Simulink → FlightGear:** flight state (position, attitude, velocity) on port 5502
+- **FlightGear → Simulink:** control surface positions on port 5503
+
+### Installation
+
+The `SynTrac2a/` aircraft model folder needs to be accessible to FlightGear. The provided launch scripts handle this automatically by setting the `FG_AIRCRAFT` environment variable to the `FlightGear/` folder inside the repo — no manual copy is required if you use them.
+
+If you prefer to install the model permanently, copy the `FlightGear/SynTrac2a/` folder to your FlightGear aircraft directory:
+
+| OS | Path |
+|---|---|
+| Linux | `~/.fgfs/Aircraft/` |
+| Windows (modern, recommended) | `C:\Users\<username>\FlightGear\Aircraft\` |
+| Windows (older installs) | `C:\Program Files\FlightGear <version>\data\Aircraft\` |
+
+Alternatively, use the FlightGear Launcher: open **Add-ons → Additional aircraft folders**, add the `FlightGear/` folder from this repo, and FlightGear will find the model without any copying.
+
+### Starting FlightGear
+
+Launch FlightGear **before** pressing Run in Simulink. From a terminal inside the `FlightGear/` folder:
+
+**Linux:**
+```bash
+./runfg_SynTrac2a.sh
+```
+
+**Windows:**
+```bat
+runfg_SynTrac2a.bat
+```
+
+On Windows the script uses `fg_install_searcher.bat` (provided in `modules/LADAC-Examples-Data/FlightGear/`) to locate the FlightGear installation automatically. Make sure the submodules are initialised so that file is present.
+
+Once FlightGear has loaded and the aircraft is visible, start the Simulink simulation as usual. FlightGear will then follow the simulated flight in real time.
 
 ---
 
