@@ -1,0 +1,290 @@
+<?xml version="1.0"?>
+
+<PropertyList>
+ 
+<path>SynTrac2a.ac</path>
+
+  <offsets>
+    <x-m>0</x-m>
+    <y-m>0</y-m>
+    <z-m>2</z-m>
+  </offsets>
+
+<animation>
+  	<name>Steuerflaechen</name>
+  	<object-name>HoehenruderLinks</object-name>
+	<object-name>HoehenruderRechts</object-name>
+	<object-name>Seitenruder</object-name>
+	<object-name>Seitenruder_rev</object-name>
+  	<object-name>QuerruderLinks</object-name>
+	<object-name>QuerruderRechts</object-name>
+</animation>
+
+<animation>
+  	<name>Propeller</name>
+  	<object-name>Propeller1</object-name>
+  	<object-name>Propeller2</object-name>
+  	<object-name>Propeller3</object-name>
+  	<object-name>Propeller4</object-name>
+  	<object-name>Propeller5</object-name>
+  	<object-name>Propeller6</object-name>
+  	<object-name>Propeller7</object-name>
+  	<object-name>Propeller8</object-name>
+  	<object-name>Propeller9</object-name>
+  	<object-name>Propeller10</object-name>
+</animation>
+
+
+<animation>
+    <type>blend</type>
+    <object-name>Propeller1</object-name>
+    <property>engines/engine[0]/rpm</property>
+	<interpolation>
+		<entry>
+			<ind>35</ind>
+			<dep>0.1</dep>
+		</entry>
+		<entry>
+			<ind>65</ind>
+			<dep>0.5</dep>
+		</entry>
+	</interpolation>
+</animation>
+
+<animation>
+    <type>blend</type>
+    <object-name>Propeller2</object-name>
+    <property>engines/engine[1]/rpm</property>
+	<interpolation>
+		<entry>
+			<ind>35</ind>
+			<dep>0.1</dep>
+		</entry>
+		<entry>
+			<ind>65</ind>
+			<dep>0.5</dep>
+		</entry>
+	</interpolation>
+</animation>
+
+<animation>
+    <type>blend</type>
+    <object-name>Propeller3</object-name>
+    <property>engines/engine[2]/rpm</property>
+	<interpolation>
+		<entry>
+			<ind>35</ind>
+			<dep>0.1</dep>
+		</entry>
+		<entry>
+			<ind>65</ind>
+			<dep>0.5</dep>
+		</entry>
+	</interpolation>
+</animation>
+
+<animation>
+    <type>blend</type>
+    <object-name>Propeller4</object-name>
+    <property>engines/engine[3]/rpm</property>
+	<interpolation>
+		<entry>
+			<ind>35</ind>
+			<dep>0.1</dep>
+		</entry>
+		<entry>
+			<ind>65</ind>
+			<dep>0.5</dep>
+		</entry>
+	</interpolation>
+</animation>
+
+<animation>
+    <type>blend</type>
+    <object-name>Propeller5</object-name>
+    <property>engines/engine[0]/fuel-flow-gph</property>
+	<interpolation>
+		<entry>
+			<ind>35</ind>
+			<dep>0.1</dep>
+		</entry>
+		<entry>
+			<ind>65</ind>
+			<dep>0.5</dep>
+		</entry>
+	</interpolation>
+</animation>
+
+<animation>
+    <type>blend</type>
+    <object-name>Propeller6</object-name>
+    <property>engines/engine[1]/fuel-flow-gph</property>
+	<interpolation>
+		<entry>
+			<ind>35</ind>
+			<dep>0.1</dep>
+		</entry>
+		<entry>
+			<ind>65</ind>
+			<dep>0.5</dep>
+		</entry>
+	</interpolation>
+</animation>
+
+<animation>
+    <type>blend</type>
+    <object-name>Propeller7</object-name>
+    <property>engines/engine[2]/fuel-flow-gph</property>
+	<interpolation>
+		<entry>
+			<ind>35</ind>
+			<dep>0.1</dep>
+		</entry>
+		<entry>
+			<ind>65</ind>
+			<dep>0.5</dep>
+		</entry>
+	</interpolation>
+</animation>
+
+<animation>
+    <type>blend</type>
+    <object-name>Propeller8</object-name>
+    <property>engines/engine[3]/fuel-flow-gph</property>
+	<interpolation>
+		<entry>
+			<ind>35</ind>
+			<dep>0.1</dep>
+		</entry>
+		<entry>
+			<ind>65</ind>
+			<dep>0.5</dep>
+		</entry>
+	</interpolation>
+</animation>
+
+<animation>
+    <type>blend</type>
+    <object-name>Propeller9</object-name>
+    <property>engines/engine[0]/fuel-px-psi</property>
+	<interpolation>
+		<entry>
+			<ind>35</ind>
+			<dep>0.1</dep>
+		</entry>
+		<entry>
+			<ind>65</ind>
+			<dep>0.5</dep>
+		</entry>
+	</interpolation>
+</animation>
+
+<animation>
+    <type>blend</type>
+    <object-name>Propeller10</object-name>
+    <property>engines/engine[1]/fuel-px-psi</property>
+	<interpolation>
+		<entry>
+			<ind>35</ind>
+			<dep>0.1</dep>
+		</entry>
+		<entry>
+			<ind>65</ind>
+			<dep>0.5</dep>
+		</entry>
+	</interpolation>
+</animation>
+
+<animation>
+    <type>rotate</type>
+    <object-name>HoehenruderLinks</object-name>
+    <property>surface-positions/elevator-pos-norm</property>
+    <factor>1</factor>
+    <axis>   
+        <x1-m> 15.163 </x1-m>
+        <y1-m> 3.324 </y1-m>
+        <z1-m> 4.64 </z1-m>
+        <x2-m> 14.841 </x2-m>
+        <y2-m> 0.179 </y2-m>
+        <z2-m> 4.448 </z2-m>
+    </axis>
+</animation>
+
+<animation>
+    <type>rotate</type>
+    <object-name>HoehenruderRechts</object-name>
+    <property>surface-positions/elevator-pos-norm</property>
+    <factor>1</factor>
+    <axis>   
+        <x1-m> 14.841 </x1-m>
+        <y1-m> -0.179 </y1-m>
+        <z1-m> 4.448 </z1-m>
+        <x2-m> 15.163 </x2-m>
+        <y2-m> -3.324 </y2-m>
+        <z2-m> 4.64 </z2-m>
+    </axis>
+</animation>
+
+<animation>
+    <type>rotate</type>
+    <object-name>Seitenruder</object-name>
+    <property>surface-positions/rudder-pos-norm</property>
+    <factor>1</factor>
+    <axis>   
+		<x1-m> 14.724 </x1-m>
+        <y1-m> 0 </y1-m>
+        <z1-m> 4 </z1-m>
+        <x2-m> 12.315 </x2-m>
+        <y2-m> 0 </y2-m>
+        <z2-m> 1.098 </z2-m>
+    </axis>
+</animation>
+
+<animation>
+    <type>rotate</type>
+    <object-name>Seitenruder_rev</object-name>
+    <property>surface-positions/rudder-pos-norm</property>
+    <factor>1</factor>
+    <axis>   
+		<x1-m> 14.724 </x1-m>
+        <y1-m> 0 </y1-m>
+        <z1-m> 4 </z1-m>
+        <x2-m> 12.315 </x2-m>
+        <y2-m> 0 </y2-m>
+        <z2-m> 1.098 </z2-m>
+    </axis>
+</animation>
+
+<animation>
+    <type>rotate</type>
+    <object-name>QuerruderLinks</object-name>
+    <property>surface-positions/left-aileron-pos-norm</property>
+    <factor>1</factor>
+    <axis>   
+        <x1-m> 0.447 </x1-m>
+        <y1-m> -13.095 </y1-m>
+        <z1-m> 1.543 </z1-m>
+		<x2-m> 0.837 </x2-m>
+        <y2-m> -9.045 </y2-m>
+        <z2-m> 1.53 </z2-m>
+    </axis>
+</animation>
+
+<animation>
+    <type>rotate</type>
+    <object-name>QuerruderRechts</object-name>
+    <property>surface-positions/right-aileron-pos-norm</property>
+    <factor>1</factor>
+    <axis>   
+		<x1-m> 0.837 </x1-m>
+        <y1-m> 9.045 </y1-m>
+        <z1-m> 1.53 </z1-m>
+        <x2-m> 0.447 </x2-m>
+        <y2-m> 13.095 </y2-m>
+        <z2-m> 1.543 </z2-m>
+    </axis>
+</animation>
+
+
+
+</PropertyList>

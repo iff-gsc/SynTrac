@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+
+<PropertyList>
+
+<sim>
+    <description>SynTrac2a</description>
+    <author>Yannic Beyer</author>
+    <flight-model>network</flight-model>
+    <model>
+        <path>Aircraft/SynTrac2a/Model/SynTrac2a.xml</path>
+    </model>
+    <view n="0">
+        <name>Custom view: follow</name>
+        <internal archive="y">true</internal>
+        <!-- requires two coordinates (eye->target) -->
+        <type>lookat</type>
+        <config>
+            <from-model type="bool">false</from-model>
+            <from-model-idx type="int">0</from-model-idx>
+            <!-- eye position -->
+            <eye-lat-deg-path>/position/latitude-deg</eye-lat-deg-path>
+            <eye-lon-deg-path>/position/longitude-deg</eye-lon-deg-path>
+            <eye-alt-ft-path>/position/altitude-ft</eye-alt-ft-path>
+            <!-- eye orientation -->                
+            <!-- target / at position -->
+            <at-model type="bool">true</at-model>
+            <at-model-idx type="int">0</at-model-idx>
+            <ground-level-nearplane-m type="double">0.5f</ground-level-nearplane-m>
+            <x-offset-m type="double">0</x-offset-m>
+            <y-offset-m type="double">10</y-offset-m>
+            <z-offset-m type="double">-40</z-offset-m>
+        </config>
+    </view>
+    <view n="1">
+        <name>Custom view: chase view</name>
+        <internal archive="y">true</internal>
+        <type>lookat</type>
+        <config>
+            <from-model type="bool">false</from-model>
+            <from-model-idx type="int">0</from-model-idx>
+            <eye-lat-deg-path>/position/latitude-deg</eye-lat-deg-path>
+            <eye-lon-deg-path>/position/longitude-deg</eye-lon-deg-path>
+            <eye-alt-ft-path>/position/altitude-ft</eye-alt-ft-path>
+            <eye-heading-deg-path>/orientation/heading-deg</eye-heading-deg-path>
+            <at-model type="bool">true</at-model>
+            <at-model-idx type="int">0</at-model-idx>
+            <ground-level-nearplane-m type="double">0.5f</ground-level-nearplane-m>
+            <x-offset-m type="double">0</x-offset-m>
+            <y-offset-m type="double">10</y-offset-m>
+            <z-offset-m type="double">-40</z-offset-m>
+        </config>
+    </view>
+    <current-view>
+        <view-number type="int">0</view-number>
+    </current-view>
+</sim>
+
+</PropertyList>
