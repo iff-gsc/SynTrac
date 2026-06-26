@@ -3,8 +3,8 @@
 <PropertyList>
 
 <sim>
-    <description>SynTrac2a</description>
-    <author>Yannic Beyer</author>
+    <description>SynTrac Configuration 2a</description>
+    <author>Institute of Flight Guidance, TU Braunschweig</author>
     <flight-model>network</flight-model>
     <model>
         <path>Aircraft/SynTrac2a/Model/SynTrac2a.xml</path>

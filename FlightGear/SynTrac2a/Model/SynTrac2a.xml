@@ -42,11 +42,11 @@
 	<interpolation>
 		<entry>
 			<ind>35</ind>
-			<dep>0.1</dep>
+			<dep>0.9</dep>
 		</entry>
 		<entry>
 			<ind>65</ind>
-			<dep>0.5</dep>
+			<dep>0.1</dep>
 		</entry>
 	</interpolation>
 </animation>
@@ -58,11 +58,11 @@
 	<interpolation>
 		<entry>
 			<ind>35</ind>
-			<dep>0.1</dep>
+			<dep>0.9</dep>
 		</entry>
 		<entry>
 			<ind>65</ind>
-			<dep>0.5</dep>
+			<dep>0.1</dep>
 		</entry>
 	</interpolation>
 </animation>
@@ -74,11 +74,11 @@
 	<interpolation>
 		<entry>
 			<ind>35</ind>
-			<dep>0.1</dep>
+			<dep>0.9</dep>
 		</entry>
 		<entry>
 			<ind>65</ind>
-			<dep>0.5</dep>
+			<dep>0.1</dep>
 		</entry>
 	</interpolation>
 </animation>
@@ -90,11 +90,11 @@
 	<interpolation>
 		<entry>
 			<ind>35</ind>
-			<dep>0.1</dep>
+			<dep>0.9</dep>
 		</entry>
 		<entry>
 			<ind>65</ind>
-			<dep>0.5</dep>
+			<dep>0.1</dep>
 		</entry>
 	</interpolation>
 </animation>
@@ -106,11 +106,11 @@
 	<interpolation>
 		<entry>
 			<ind>35</ind>
-			<dep>0.1</dep>
+			<dep>0.9</dep>
 		</entry>
 		<entry>
 			<ind>65</ind>
-			<dep>0.5</dep>
+			<dep>0.1</dep>
 		</entry>
 	</interpolation>
 </animation>
@@ -122,11 +122,11 @@
 	<interpolation>
 		<entry>
 			<ind>35</ind>
-			<dep>0.1</dep>
+			<dep>0.9</dep>
 		</entry>
 		<entry>
 			<ind>65</ind>
-			<dep>0.5</dep>
+			<dep>0.1</dep>
 		</entry>
 	</interpolation>
 </animation>
@@ -138,11 +138,11 @@
 	<interpolation>
 		<entry>
 			<ind>35</ind>
-			<dep>0.1</dep>
+			<dep>0.9</dep>
 		</entry>
 		<entry>
 			<ind>65</ind>
-			<dep>0.5</dep>
+			<dep>0.1</dep>
 		</entry>
 	</interpolation>
 </animation>
@@ -154,11 +154,11 @@
 	<interpolation>
 		<entry>
 			<ind>35</ind>
-			<dep>0.1</dep>
+			<dep>0.9</dep>
 		</entry>
 		<entry>
 			<ind>65</ind>
-			<dep>0.5</dep>
+			<dep>0.1</dep>
 		</entry>
 	</interpolation>
 </animation>
@@ -170,11 +170,11 @@
 	<interpolation>
 		<entry>
 			<ind>35</ind>
-			<dep>0.1</dep>
+			<dep>0.9</dep>
 		</entry>
 		<entry>
 			<ind>65</ind>
-			<dep>0.5</dep>
+			<dep>0.1</dep>
 		</entry>
 	</interpolation>
 </animation>
@@ -186,11 +186,11 @@
 	<interpolation>
 		<entry>
 			<ind>35</ind>
-			<dep>0.1</dep>
+			<dep>0.9</dep>
 		</entry>
 		<entry>
 			<ind>65</ind>
-			<dep>0.5</dep>
+			<dep>0.1</dep>
 		</entry>
 	</interpolation>
 </animation>
@@ -202,10 +202,10 @@
     <factor>1</factor>
     <axis>   
         <x1-m> 15.163 </x1-m>
-        <y1-m> 3.324 </y1-m>
+        <y1-m> -3.324 </y1-m>
         <z1-m> 4.64 </z1-m>
         <x2-m> 14.841 </x2-m>
-        <y2-m> 0.179 </y2-m>
+        <y2-m> -0.179 </y2-m>
         <z2-m> 4.448 </z2-m>
     </axis>
 </animation>
@@ -217,10 +217,10 @@
     <factor>1</factor>
     <axis>   
         <x1-m> 14.841 </x1-m>
-        <y1-m> -0.179 </y1-m>
+        <y1-m> 0.179 </y1-m>
         <z1-m> 4.448 </z1-m>
         <x2-m> 15.163 </x2-m>
-        <y2-m> -3.324 </y2-m>
+        <y2-m> 3.324 </y2-m>
         <z2-m> 4.64 </z2-m>
     </axis>
 </animation>
