@@ -1,4 +1,39 @@
 function aircraft = aircraftSyntracCreate( varargin )
+% aircraftSyntracCreate returns a struct with all flight dynamics model
+% parameters
+% 
+% Syntax:
+%   aircraft = aircraftSyntracCreate()
+%   aircraft = aircraftSyntracCreate( name, value )
+% 
+% Example 1:
+%   aircraft = aircraftSyntracCreate()
+% 
+% Example 2:
+%   aircraft = aircraftSyntracCreate( 'MassCase', 'OEM' )
+% 
+% Inputs:
+%   Available name-value arguments:
+%       - 'MassCase':   Desired mass case with options: 
+%                           'MTOM'  (maximum takeoff mass, default)
+%                           'OEM'   (operating empty mass)
+%       - 'PropConfig': Desired propeller configuration with options:
+%                           'Inner' (inner configuration - propellers are
+%                                   located closer to fuselage, default)
+%                           'Outer' (outer configuration - propellers are
+%                                   located closer to wing tip)
+%       - 'NumPanelWing':   Number of wing panels (default: 58)
+%       - 'NumPanelHtp':    Number of horizontal tailplane panels (default:
+%                           16)
+%       - 'NumPanelVtp':    Number of vertical tailplane panels (default:
+%                           8)
+% 
+% Outputs:
+%   aircraft        Aircraft parameters struct (as defined by this function
+%                   and as needed for the Simulink block "SynTrac
+%                   Configuration 2a")
+% 
+% *************************************************************************
 
 p = inputParser;
 
