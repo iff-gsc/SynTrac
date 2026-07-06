@@ -70,8 +70,14 @@ function data = readTecplotPointFile(filename)
         headerDone = false;   % becomes true once we've passed the ZONE line
         dataLines  = {};      % raw text lines containing numeric data
 
+        j=0;
+        i=1;
         while ~feof(fid)
-            line = strtrim(fgetl(fid));
+            str = fgetl(fid);
+            if str == -1
+                break % end of file
+            end
+            line = strtrim(str);
 
             if isempty(line)
                 continue   % skip blank lines
