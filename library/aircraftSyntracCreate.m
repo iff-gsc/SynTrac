@@ -43,10 +43,12 @@ default_n_panel_vtp = 8;
 % default_n_seg_fuse = 15;
 default_mass_case = 'MTOM';
 default_prop_config = 'Inner';
+default_k_slipstream = 1;
 
 valid_panel_number = @(x) isnumeric(x) && isscalar(x) && (x>1) && (mod(x,1)==0);
 valid_mass_case = @(x) ischar(x) && ismember(x, {'MTOM','OEM'});
 valid_prop_config = @(x) ischar(x) && ismember(x, {'Inner','Outer'});
+valid_k_slipstream = @(x) isnumeric(x) && isscalar(x) && (x>=1) && (x<=2);
 
 addParameter(p,'NumPanelWing',default_n_panel_wing,valid_panel_number);
 addParameter(p,'NumPanelHtp',default_n_panel_htp,valid_panel_number);
@@ -54,6 +56,7 @@ addParameter(p,'NumPanelVtp',default_n_panel_vtp,valid_panel_number);
 % addParameter(p,'NumSegFuse',default_n_seg_fuse,valid_panel_number);
 addParameter(p,'MassCase',default_mass_case,valid_mass_case);
 addParameter(p,'PropConfig',default_prop_config,valid_prop_config);
+addParameter(p,'Kslipstream',default_k_slipstream,valid_k_slipstream);
 
 parse(p,varargin{:})
 
@@ -102,6 +105,7 @@ end
 for i = 1:length(prop)
     prop(i).angle = deg2rad(-5);
     prop(i).diameter = 2.35;
+    prop(i).k = p.Results.Kslipstream;
     if i <= length(prop)/2
         prop(i).dir = -1;
     else
@@ -117,9 +121,10 @@ wing_params = wingLoadParameters( 'wing_params_2a' );
 eta_edges = [];
 p_per_prop = 4;
 for i = length(prop)/2+1:length(prop)
-    r = prop(i).diameter/2;
+    r = prop(i).diameter/2; 
+    r_k = 1/sqrt(prop(i).k)*r;
     eta_edges(end+1:end+p_per_prop+1) = ( prop(i).pos_c(2) + ...
-        linspace( -r, r, p_per_prop+1 ) ) ...
+        linspace( -r_k, r_k, p_per_prop+1 ) ) ...
         / (0.5*wing_params.b);
 end
 eta_edges(eta_edges>1) = [];
