@@ -157,14 +157,8 @@ if nargout >= 4
                 elim(i) = true;
             end
         end
-        % [lin_red.A,lin_red.B,lin_red.C,lin_red.D] = modredEmb2( ...
-        %     lin.A,lin.B,lin.C,lin.D,elim);
-        sys = ss(lin.A,lin.B,lin.C,lin.D);
-        sys_red = modred(sys,elim);
-        lin_red.A = sys_red.A;
-        lin_red.B = sys_red.B;
-        lin_red.C = sys_red.C;
-        lin_red.D = sys_red.D;
+        [lin_red.A,lin_red.B,lin_red.C,lin_red.D] = modredEmb2( ...
+            lin.A,lin.B,lin.C,lin.D,elim);
         lin_red.StateNames = lin.StateNames(~elim);
         lin_red.InputNames = lin.InputNames;
         lin_red.OutputNames = lin.OutputNames;
