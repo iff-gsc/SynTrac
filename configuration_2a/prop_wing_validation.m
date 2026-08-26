@@ -7,10 +7,10 @@ addPathConfig2a();
 
 % Validation angles of attack, in deg
 AoA = [3]; % Available: 0, 0.7, 1, 3 | AOA3 has most available validation data
-AoA_offset = -0.4; % Offset of LLT compared to CFD
+AoA_offset = -0.4; % Offset of LLT compared to CFD / -0.4 makes a good fit with CFD
 
 % Aircraft parameters
-aircraft = aircraftSyntracCreate('NumPanelWing',56*4, 'Kslipstream', 1);
+aircraft = aircraftSyntracCreate('NumPanelWing',56*4, 'Kslipstream', 1, 'ApplyVi', 1, 'ApplySwirl', 1);
 
 % Extract main wing
 wing = aircraft.wing_main;
@@ -35,10 +35,10 @@ actuators_rate = [ 0 0 ];
 % Propeller Delta pitches, in deg
 
 % for uniform thrust values
-% pitches = [1,1,1,1,1,1,1,1,1,1]*-1;
+pitches = [1,1,1,1,1,1,1,1,1,1]*-1;
 
 % to match the non-uniform thrust values from CFD results (AOA=3°)
-pitches = [-1.73,-1.31,-1.03,-0.87,-0.64,-0.64,-0.87,-1.03,-1.31,-1.73]; 
+% pitches = [-1.73,-1.31,-1.03,-0.87,-0.64,-0.64,-0.87,-1.03,-1.31,-1.73]; 
 
 %% Run propellers
 
@@ -51,8 +51,17 @@ pitches = [-1.73,-1.31,-1.03,-0.87,-0.64,-0.64,-0.87,-1.03,-1.31,-1.73];
 prop_pos = [aircraft.prop.pos_c];
 prop_y_pos = prop_pos(2,:);
 V_Wb = wingApplySlipstream( wing, prop_y_pos, [aircraft.prop.angle], ...
-    [aircraft.prop.diameter], vi, [aircraft.prop.dir]'.*swirls, [aircraft.prop.k] );
-
+    [aircraft.prop.diameter], vi, [aircraft.prop.dir]'.*swirls, [aircraft.prop.k], ...
+    [aircraft.prop.apply_vi], [aircraft.prop.apply_swirl] );
+% For analyses with only prop 7 running (second to inner most prop on right
+% side
+vi_prop2 = zeros(size(vi));
+vi_prop2(7) = vi(7);
+swirls_prop2 = zeros(size(vi));
+swirls_prop2(7) = [aircraft.prop(7).dir]'.*swirls(7);
+V_Wb_prop2 = wingApplySlipstream( wing, prop_y_pos, [aircraft.prop.angle], ...
+    [aircraft.prop.diameter], vi_prop2, swirls_prop2, [aircraft.prop.k] , ...
+    [aircraft.prop.apply_vi], [aircraft.prop.apply_swirl]);
 
 %% Compute and plot wing lift and drag distribution for all specified AoA
 
@@ -85,14 +94,11 @@ for i = 1:length(AoA)
         actuators_pos, actuators_rate, xyz_cg, 'atmosphere', isAtmosphere(h), ...
         'V_Wb', V_Wb*0, 'V_Wb_dt', zeros( 3, wing.n_panel ) );
 
-    % Run LLT only with 2nd and 9th prop running (only works with num-panel
-    % == 112)
+    % Run LLT only with 7th prop running
     wing1 = wing;
-    V_Wb_2nd_9th_running = V_Wb;
-    V_Wb_2nd_9th_running(:, [1:31, 40:73, 82:end]) = 0;
     wing1 = wingSetState(wing1, alpha, beta, V, omega, ...
         actuators_pos, actuators_rate, xyz_cg, 'atmosphere', isAtmosphere(h), ...
-        'V_Wb', V_Wb_2nd_9th_running, 'V_Wb_dt', zeros( 3, wing.n_panel ) );
+        'V_Wb', V_Wb_prop2, 'V_Wb_dt', zeros( 3, wing.n_panel ) );
 
     % Force components in body frame
     X_i_b = wing.state.aero.force_loc.R_i_b(1,end/2+1:end);
@@ -182,7 +188,7 @@ for i = 1:length(AoA)
         plot( CFD2.y, CFD2.dFx_dy*-sind(AoA(i))+CFD2.dFz_dy*cosd(AoA(i)), '-', DisplayName=nameCFD2 )
         % plot( CFD3.y, CFD3.dFx_dy*-sind(AoA(i))+CFD3.dFz_dy*cosd(AoA(i)), '-', DisplayName=nameCFD3 )
         % plot( CFD4.y, CFD4.dFx_dy*-sind(AoA(i))+CFD4.dFz_dy*cosd(AoA(i)), '-', DisplayName=nameCFD4 )
-        % plot( CFD5.y, CFD5.dFx_dy*-sind(AoA(i))+CFD5.dFz_dy*cosd(AoA(i)), '-', DisplayName=nameCFD5 )
+        plot( CFD5.y, CFD5.dFx_dy*-sind(AoA(i))+CFD5.dFz_dy*cosd(AoA(i)), '-', DisplayName=nameCFD5 )
         plot( y, (-X_i_b*-sin(alpha)-Z_i_b*cos(alpha))./Delta_y, '-', DisplayName=nameLLT1 )
         plot( y_clean, (-X_i_b_clean*-sin(alpha)-Z_i_b_clean*cos(alpha))./Delta_y_clean, '-', DisplayName=nameLLT2 )
         %plot( y_one_prop, (-X_i_b_one_prop*-sin(alpha)-Z_i_b_one_prop*cos(alpha))./Delta_y_one_prop, '-', DisplayName=nameLLT3 )
@@ -190,7 +196,7 @@ for i = 1:length(AoA)
         figure(2) % Plot drag distribution
         plot( CFD1.y, CFD1.dFx_dy*cosd(AoA(i))+CFD1.dFz_dy*sind(AoA(i)), '-', DisplayName=nameCFD1 )
         plot( CFD2.y, CFD2.dFx_dy*cosd(AoA(i))+CFD2.dFz_dy*sind(AoA(i)), '-', DisplayName=nameCFD2 )
-        % plot( CFD3.y, CFD3.dFx_dy*cosd(AoA(i))+CFD3.dFz_dy*sind(AoA(i)), '-', DisplayName=nameCFD3 )
+        plot( CFD3.y, CFD3.dFx_dy*cosd(AoA(i))+CFD3.dFz_dy*sind(AoA(i)), '-', DisplayName=nameCFD3 )
         % plot( CFD4.y, CFD4.dFx_dy*cosd(AoA(i))+CFD4.dFz_dy*sind(AoA(i)), '-', DisplayName=nameCFD4 )
         % plot( CFD5.y, CFD5.dFx_dy*cosd(AoA(i))+CFD5.dFz_dy*sind(AoA(i)), '-', DisplayName=nameCFD5 )
         plot( y, (-X_i_b*cos(alpha)-Z_i_b*sin(alpha))./Delta_y, '-', DisplayName=nameLLT1 )
@@ -199,18 +205,25 @@ for i = 1:length(AoA)
 
         % Plot difference in lift between the all props on vs. off case
         figure(3)
-        plot( CFD1.y, (CFD1.dFx_dy*-sind(AoA(i))+CFD1.dFz_dy*cosd(AoA(i)))-(CFD2.dFx_dy*-sind(AoA(i))+CFD2.dFz_dy*cosd(AoA(i))), '-', DisplayName='Differnce in Lift from CFD' )
         hold on
+        plot( CFD1.y, (CFD1.dFx_dy*-sind(AoA(i))+CFD1.dFz_dy*cosd(AoA(i)))-(CFD2.dFx_dy*-sind(AoA(i))+CFD2.dFz_dy*cosd(AoA(i))), '-', DisplayName='Differnce in Lift from CFD' )
+        plot( CFD3.y, (CFD3.dFx_dy*-sind(AoA(i))+CFD3.dFz_dy*cosd(AoA(i)))-(CFD2.dFx_dy*-sind(AoA(i))+CFD2.dFz_dy*cosd(AoA(i))), '-', DisplayName='Differnce in Lift from CFD' )
         plot( y, ((-X_i_b*-sin(alpha)-Z_i_b*cos(alpha))./Delta_y)-((-X_i_b_clean*-sin(alpha)-Z_i_b_clean*cos(alpha))./Delta_y_clean), '-', DisplayName='Differnce in Lift from LLT' )
+        plot( y, ((-X_i_b_one_prop*-sin(alpha)-Z_i_b_one_prop*cos(alpha))./Delta_y)-((-X_i_b_clean*-sin(alpha)-Z_i_b_clean*cos(alpha))./Delta_y_clean), '-', DisplayName='Differnce in Lift from LLT' )
+
         legend show
+        grid on
         title('Difference in lift (propellers on minus off)')
 
         % Plot difference in drag between the all props on vs. off case
         figure(4)
-        plot( CFD1.y, (CFD1.dFx_dy*cosd(AoA(i))+CFD1.dFz_dy*sind(AoA(i)))-(CFD2.dFx_dy*cosd(AoA(i))+CFD2.dFz_dy*sind(AoA(i))), '-', DisplayName='Differnce in Drag from CFD' )
         hold on
+        plot( CFD1.y, (CFD1.dFx_dy*cosd(AoA(i))+CFD1.dFz_dy*sind(AoA(i)))-(CFD2.dFx_dy*cosd(AoA(i))+CFD2.dFz_dy*sind(AoA(i))), '-', DisplayName='Differnce in Drag from CFD' )
+        plot( CFD3.y, (CFD3.dFx_dy*cosd(AoA(i))+CFD3.dFz_dy*sind(AoA(i)))-(CFD2.dFx_dy*cosd(AoA(i))+CFD2.dFz_dy*sind(AoA(i))), '-', DisplayName='Differnce in Drag from CFD' )        
         plot( y, ((-X_i_b*cos(alpha)-Z_i_b*sin(alpha))./Delta_y)-((-X_i_b_clean*cos(alpha)-Z_i_b_clean*sin(alpha))./Delta_y_clean), '-', DisplayName='Differnce in Drag from LLT' )
+        plot( y, ((-X_i_b_one_prop*cos(alpha)-Z_i_b_one_prop*sin(alpha))./Delta_y)-((-X_i_b_clean*cos(alpha)-Z_i_b_clean*sin(alpha))./Delta_y_clean), '-', DisplayName='Differnce in Drag from LLT' )        
         legend show
+        grid on
         title('Difference in drag (propellers on minus off)')
 
     else

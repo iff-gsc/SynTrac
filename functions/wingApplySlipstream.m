@@ -1,5 +1,5 @@
 function V_Wb = wingApplySlipstream( wing, prop_y_pos, prop_ang, ...
-                    prop_d, v_i, swirls, k_slip )
+                    prop_d, v_i, swirls, k_slip, apply_vi, apply_swirl ) 
 % wingApplySlipstream computes the wind at each panel created by propellers
 % in front of the wing. Two effects are considered: Induced velocity and
 % swirl
@@ -23,6 +23,10 @@ function V_Wb = wingApplySlipstream( wing, prop_y_pos, prop_ang, ...
 %   k_slip          Scalar contraction factor of slipstream tube that is 
 %                   impacting the wing leading edge (1xN_p array)
 %                   1 corresponds to no contraction; 2 to max. contraction
+%   apply_vi        a value of either 1 or 0 that decides whether axial
+%                   slipstream is applied in PWI model
+%   apply_swirl     a value of either 1 or 0 that decides whether
+%                   tangential slipstream is applied in PWI model
 % 
 % Outputs:
 %   V_Wb            Additional airspeed vector at each panel of the wing in
@@ -40,6 +44,8 @@ function V_Wb = wingApplySlipstream( wing, prop_y_pos, prop_ang, ...
 
 V_Wb = zeros(size(wing.state.external.V_Wb));
 r_eval = zeros( 1, size(V_Wb,2) );
+v_i = apply_vi(1)*v_i;
+swirls = apply_swirl(1)*swirls;
 
 n_props = length(prop_y_pos);
 for i = 1:n_props

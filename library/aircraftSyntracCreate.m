@@ -27,6 +27,14 @@ function aircraft = aircraftSyntracCreate( varargin )
 %                           16)
 %       - 'NumPanelVtp':    Number of vertical tailplane panels (default:
 %                           8)
+%       - 'KSlipstream':    contraction factor of propeller slipstream 
+%                           (default: 1)
+%       - 'ApplyVi':        boolean that decides whether axial slipstream 
+%                           component is applied to wing inflow
+%                           (default: 1)
+%       - 'ApplySwirl':    boolean that decides whether tangential 
+%                           slipstream component is applied to wing inflow
+%                           (default: 1)
 % 
 % Outputs:
 %   aircraft        Aircraft parameters struct (as defined by this function
@@ -44,11 +52,15 @@ default_n_panel_vtp = 8;
 default_mass_case = 'MTOM';
 default_prop_config = 'Inner';
 default_k_slipstream = 1;
+default_apply_vi = 1;
+default_apply_swirl = 1;
 
 valid_panel_number = @(x) isnumeric(x) && isscalar(x) && (x>1) && (mod(x,1)==0);
 valid_mass_case = @(x) ischar(x) && ismember(x, {'MTOM','OEM'});
 valid_prop_config = @(x) ischar(x) && ismember(x, {'Inner','Outer'});
 valid_k_slipstream = @(x) isnumeric(x) && isscalar(x) && (x>=1) && (x<=2);
+valid_apply_vi = @(x) isnumeric(x) && isscalar(x) && ((x==1) || (x==0));
+valid_apply_swirl = @(x) isnumeric(x) && isscalar(x) && ((x==1) || (x==0));
 
 addParameter(p,'NumPanelWing',default_n_panel_wing,valid_panel_number);
 addParameter(p,'NumPanelHtp',default_n_panel_htp,valid_panel_number);
@@ -57,6 +69,8 @@ addParameter(p,'NumPanelVtp',default_n_panel_vtp,valid_panel_number);
 addParameter(p,'MassCase',default_mass_case,valid_mass_case);
 addParameter(p,'PropConfig',default_prop_config,valid_prop_config);
 addParameter(p,'Kslipstream',default_k_slipstream,valid_k_slipstream);
+addParameter(p,'ApplyVi',default_apply_vi,valid_apply_vi);
+addParameter(p,'ApplySwirl',default_apply_swirl,valid_apply_swirl);
 
 parse(p,varargin{:})
 
@@ -106,6 +120,8 @@ for i = 1:length(prop)
     prop(i).angle = deg2rad(-5);
     prop(i).diameter = 2.35;
     prop(i).k = p.Results.Kslipstream;
+    prop(i).apply_vi = p.Results.ApplyVi;
+    prop(i).apply_swirl = p.Results.ApplySwirl;
     if i <= length(prop)/2
         prop(i).dir = -1;
     else
@@ -155,6 +171,5 @@ aircraft.prop_table = prop_table;
 aircraft.actuators = act;
 aircraft.config = config;
 aircraft.vtp_sideslip_factor = 1.7;
-
 
 end
