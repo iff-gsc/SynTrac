@@ -1,0 +1,6 @@
+[submodule "modules/LADAC"]
+	path = modules/LADAC
+	url = https://github.com/iff-gsc/ladac
+[submodule "modules/LADAC-Examples-Data"]
+	path = modules/LADAC-Examples-Data
+	url = https://github.com/iff-gsc/LADAC-Examples-Data
