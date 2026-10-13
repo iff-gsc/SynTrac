@@ -79,9 +79,9 @@ init_states_val = [1];
 
 trim_states = {'q_bg(3)','V__Kb(1)','V__Kb(3)','elevator/A','elevator/dot_A',...
     'Props pitch/A(1:10)','Props pitch/dot_A(1:10)','Downwash'};
-trim_states_val = [0,V,0,0,0,zeros(1,10),zeros(1,10),0];
+trim_states_val = [0,V,0,0,0,deg2rad(max(-15,-15+(V-80)/100*18))*ones(1,10),zeros(1,10),0];
 trim_inputs = {'Cmd Elevator','Cmd Collective Thrust'};
-trim_inputs_val = [-0.1,0.5];
+trim_inputs_val = [-0.1,max(0,0+(V-80)/100*0.6)];
 known_derivs = {'rates(2)','V__Kb(1)','V__Kb(3)','elevator/A','elevator/dot_A',...
     'Props pitch/A(1:10)','Props pitch/dot_A(1:10)','Downwash'};
 known_derivs_val = [0,0,0,0,0,zeros(1,10),zeros(1,10),0];
@@ -108,7 +108,7 @@ y(i_y) = known_outputs_val;
 
 % Other jj_trim input parameters
 del_x_max = repmat(1e42,size(x));
-del_u_max = repmat(2,size(u));
+del_u_max = repmat(0.1,size(u));
 del_x_lin = repmat(1e-6,size(x));
 del_u_lin = repmat(1e-6,size(u));
 
