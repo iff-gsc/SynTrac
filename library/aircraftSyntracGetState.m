@@ -14,9 +14,11 @@ for i = 1:num_fields
         fieldname = ['wing_',num2str(wing_count),'_state'];
         fieldvar = aircraft.(field_name).state;
     elseif contains(field_name,'fuselage')
-        fuse_count = fuse_count + 1;
-        fieldname = ['fuselage_',num2str(fuse_count),'_state'];
-        fieldvar = aircraft.(field_name).state;
+        if isfield(aircraft.fuselage,'state')
+            fuse_count = fuse_count + 1;
+            fieldname = ['fuselage_',num2str(fuse_count),'_state'];
+            fieldvar = aircraft.(field_name).state;
+        end
     elseif strcmp(field_name,'config')
         fieldname = 'config';
         fieldvar = aircraft.(field_name);

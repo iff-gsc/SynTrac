@@ -156,6 +156,12 @@ derivs = wingGetDerivs(wing_main);
 downwash.C_Lalpha = -derivs.alpha(3);
 downwash.C_Leta = -derivs.eta(3,:);
 
+%% Fuselage (3450N at V=136.33m/s, rho=0.61, Ma=0.435)
+% Fuselage frontal area (m^2)
+fuselage.S = pi*1.5^2;
+% Drag coefficient at Ma=0
+fuselage.C_D = 0.0775;
+
 %% actuator dynamics
 act = loadParams('actuators_params_syntrac');
 
@@ -164,7 +170,7 @@ aircraft.body = body;
 aircraft.wing_main = wing_main;
 aircraft.wing_htp = wing_htp;
 aircraft.wing_vtp = wing_vtp;
-% aircraft.fuselage = fuselage;
+aircraft.fuselage = fuselage;
 aircraft.downwash = downwash;
 aircraft.prop = prop;
 aircraft.prop_table = prop_table;
