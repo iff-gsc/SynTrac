@@ -27,6 +27,8 @@ function aircraft = aircraftSyntracCreate( varargin )
 %                           16)
 %       - 'NumPanelVtp':    Number of vertical tailplane panels (default:
 %                           8)
+%       - 'Mach':           Mach number for computing the influence
+%                           coefficients matrix (default: 0.4349)
 %       - 'KSlipstream':    contraction factor of propeller slipstream 
 %                           (default: 1)
 %       - 'ApplyVi':        boolean that decides whether axial slipstream 
@@ -54,6 +56,7 @@ default_prop_config = 'Inner';
 default_k_slipstream = 1;
 default_apply_vi = 1;
 default_apply_swirl = 1;
+default_Ma = 0.4349;
 
 valid_panel_number = @(x) isnumeric(x) && isscalar(x) && (x>1) && (mod(x,1)==0);
 valid_mass_case = @(x) ischar(x) && ismember(x, {'MTOM','OEM'});
@@ -61,6 +64,7 @@ valid_prop_config = @(x) ischar(x) && ismember(x, {'Inner','Outer'});
 valid_k_slipstream = @(x) isnumeric(x) && isscalar(x) && (x>=1) && (x<=2);
 valid_apply_vi = @(x) isnumeric(x) && isscalar(x) && ((x==1) || (x==0));
 valid_apply_swirl = @(x) isnumeric(x) && isscalar(x) && ((x==1) || (x==0));
+valid_Ma = @(x) (x>=0) && (x<=0.8);
 
 addParameter(p,'NumPanelWing',default_n_panel_wing,valid_panel_number);
 addParameter(p,'NumPanelHtp',default_n_panel_htp,valid_panel_number);
@@ -71,6 +75,7 @@ addParameter(p,'PropConfig',default_prop_config,valid_prop_config);
 addParameter(p,'Kslipstream',default_k_slipstream,valid_k_slipstream);
 addParameter(p,'ApplyVi',default_apply_vi,valid_apply_vi);
 addParameter(p,'ApplySwirl',default_apply_swirl,valid_apply_swirl);
+addParameter(p,'Mach',default_Ma,valid_Ma);
 
 parse(p,varargin{:})
 
@@ -146,9 +151,11 @@ end
 eta_edges(eta_edges>1) = [];
 eta_edges(eta_edges<0) = [];
 wing_main = wingCreate( 'wing_params_2a', p.Results.NumPanelWing, ...
-    'EtaEdges', eta_edges );
-wing_htp = wingCreate( 'wing_params_htp2a', p.Results.NumPanelHtp );
-wing_vtp = wingCreate( 'wing_params_vtp2a', p.Results.NumPanelVtp );
+    'EtaEdges', eta_edges, 'Mach', p.Results.Mach );
+wing_htp = wingCreate( 'wing_params_htp2a', p.Results.NumPanelHtp, ...
+    'Mach', p.Results.Mach );
+wing_vtp = wingCreate( 'wing_params_vtp2a', p.Results.NumPanelVtp, ...
+    'Mach', p.Results.Mach );
 
 %% wing downwash
 downwash = wingGetDownwashDerivs( wing_main, wing_htp );
