@@ -22,7 +22,10 @@ function aircraft = aircraftSyntracCreate( varargin )
 %                                   located closer to fuselage, default)
 %                           'Outer' (outer configuration - propellers are
 %                                   located closer to wing tip)
-%       - 'NumPanelWing':   Number of wing panels (default: 58)
+%       - 'NumPanelWing':   Number of wing panels (default: 58), in case of
+%                           more panels, you should only use 58+44 or 
+%                           58+44+88+6 to assure that the number of panels
+%                           behind all propellers are equal
 %       - 'NumPanelHtp':    Number of horizontal tailplane panels (default:
 %                           16)
 %       - 'NumPanelVtp':    Number of vertical tailplane panels (default:
@@ -58,6 +61,7 @@ default_apply_vi = 1;
 default_apply_swirl = 1;
 default_Ma = 0.4349;
 
+valid_panel_number_wing = @(x) ismember(x, [58, 102, 196]);
 valid_panel_number = @(x) isnumeric(x) && isscalar(x) && (x>1) && (mod(x,1)==0);
 valid_mass_case = @(x) ischar(x) && ismember(x, {'MTOM','OEM'});
 valid_prop_config = @(x) ischar(x) && ismember(x, {'Inner','Outer'});
@@ -66,7 +70,7 @@ valid_apply_vi = @(x) isnumeric(x) && isscalar(x) && ((x==1) || (x==0));
 valid_apply_swirl = @(x) isnumeric(x) && isscalar(x) && ((x==1) || (x==0));
 valid_Ma = @(x) (x>=0) && (x<=0.8);
 
-addParameter(p,'NumPanelWing',default_n_panel_wing,valid_panel_number);
+addParameter(p,'NumPanelWing',default_n_panel_wing,valid_panel_number_wing);
 addParameter(p,'NumPanelHtp',default_n_panel_htp,valid_panel_number);
 addParameter(p,'NumPanelVtp',default_n_panel_vtp,valid_panel_number);
 % addParameter(p,'NumSegFuse',default_n_seg_fuse,valid_panel_number);
