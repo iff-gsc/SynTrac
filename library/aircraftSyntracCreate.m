@@ -67,7 +67,7 @@ default_n_panel_wing = 58;
 default_n_panel_htp = 16;
 default_n_panel_vtp = 8;
 % default_n_seg_fuse = 15;
-default_mass_case = 'MTOM';
+default_mass_case = 'Cruise';
 default_prop_config = 'Inner';
 default_k_slipstream = 1;
 default_apply_vi = 1;
@@ -78,7 +78,7 @@ default_prop_extrap = 'Linear';
 
 valid_panel_number_wing = @(x) ismember(x, [58, 102, 196]);
 valid_panel_number = @(x) isnumeric(x) && isscalar(x) && (x>1) && (mod(x,1)==0);
-valid_mass_case = @(x) ischar(x) && ismember(x, {'MTOM','OEM'});
+valid_mass_case = @(x) ischar(x) && ismember(x, {'MTOM','OEM','Cruise'});
 valid_prop_config = @(x) ischar(x) && ismember(x, {'Inner','Outer'});
 valid_k_slipstream = @(x) isnumeric(x) && isscalar(x) && (x>=1) && (x<=2);
 valid_apply_vi = @(x) isnumeric(x) && isscalar(x) && ((x==1) || (x==0));
@@ -109,6 +109,9 @@ if strcmp(p.Results.MassCase, 'MTOM')
 elseif strcmp(p.Results.MassCase, 'OEM')
     body.m = 15839;
     body.I = diag( [ 154459, 435801, 501731 ]);
+elseif strcmp(p.Results.MassCase, 'Cruise')
+        body.m = 24294;
+    body.I = diag( [ 217205, 612834, 705546 ]);
 end
 
 %% configuration parameters
