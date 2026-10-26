@@ -25,13 +25,15 @@ function [tbl, tbl_bus, tbl_meta] = xprop_load_table(mat_file)
 % STRUCT FIELDS (= bus elements):
 %   .pitch_vec      [n_p x 1]    pitch_delta axis [deg]
 %   .J_vec          [n_J x 1]    advance ratio axis [-]
-%   .J_mat          [n_p x n_J]  advance ratio grid, NaN where no data
+%   .J_mat          [n_p x n_J]  advance ratio grid
 %   .Ct_mat         [n_p x n_J]  thrust coefficient [-]
 %   .Cp_mat         [n_p x n_J]  power coefficient [-]
 %   .dCt_dbeta_mat  [n_p x n_J]  dCt/d(pitch_delta) [1/deg]
 %   .dCp_dbeta_mat  [n_p x n_J]  dCp/d(pitch_delta) [1/deg]
 %   .dCt_dJ_mat     [n_p x n_J]  dCt/dJ [-]
 %   .dCp_dJ_mat     [n_p x n_J]  dCp/dJ [-]
+%   .valid_mat      [n_p x n_J]  uint8, 1 = trustworthy node
+%   .stall_mat      [n_p x n_J]  uint8, 1 = stalled side of the pitch row
 
 %% ---- Default path -------------------------------------------------------
 if nargin < 1 || isempty(mat_file)
@@ -50,7 +52,7 @@ s = load(mat_file);
 
 required = {'pitch_vec','J_vec','J_mat','Ct_mat','Cp_mat', ...
             'dCt_dbeta_mat','dCp_dbeta_mat','dCt_dJ_mat','dCp_dJ_mat', ...
-            'valid_mat'};
+            'valid_mat', 'stall_mat'};
 for k = 1:length(required)
     if ~isfield(s, required{k})
         error('xprop_load_table:missingVar', ...
@@ -60,10 +62,10 @@ for k = 1:length(required)
 end
 
 %% ---- Build tbl struct ---------------------------------------------------
-% NaN padding in the matrices marks cells with no XROTOR data. Simulink
-% bus Constant blocks require all values to be finite, so NaNs are replaced
-% with 0. The interp_grid lookup clamps to valid ranges before indexing,
-% so these zero-padded cells are never reached at runtime.
+% xprop_build_matfile delivers complete grids (holes filled, envelope
+% extrapolated). Simulink bus Constant blocks require all values to be
+% finite, so any remaining NaN (e.g. from an old .mat file) is replaced
+% with 0 as a safeguard. valid_mat marks the trustworthy nodes.
 nan0 = @(x) subsasgn(x, substruct('()', {isnan(x)}), 0);
 
 tbl.pitch_vec     = s.pitch_vec;
@@ -76,6 +78,7 @@ tbl.dCp_dbeta_mat = nan0(s.dCp_dbeta_mat);
 tbl.dCt_dJ_mat    = nan0(s.dCt_dJ_mat);
 tbl.dCp_dJ_mat    = nan0(s.dCp_dJ_mat);
 tbl.valid_mat     = s.valid_mat;       
+tbl.stall_mat     = s.stall_mat;
 
 tbl_meta = s.meta;
 
@@ -86,7 +89,7 @@ tbl_meta = s.meta;
 
 bus_fields = {'pitch_vec', 'J_vec', 'J_mat', 'Ct_mat', 'Cp_mat', ...
               'dCt_dbeta_mat', 'dCp_dbeta_mat', 'dCt_dJ_mat', 'dCp_dJ_mat', ...
-              'valid_mat'};
+              'valid_mat', 'stall_mat'};
 
 bus_descriptions = { ...
     'pitch_delta axis [deg], row index of all _mat grids', ...
@@ -98,10 +101,12 @@ bus_descriptions = { ...
     'dCp/d(pitch_delta) [1/deg], precomputed offline, 0 where no data', ...
     'dCt/dJ [-], precomputed offline, 0 where no data', ...
     'dCp/dJ [-], precomputed offline, 0 where no data', ...
-    'Valid cell mask [uint8]: 1 = real XROTOR data, 0 = padded cell'};
+    'Valid cell mask [uint8]: 1 = value and derivatives from trusted data, 0 = not', ...
+    'Stall mask [uint8]: 1 = stalled side of the pitch row (conservative), 0 = not'};
 
 % valid_mat is logical in MATLAB; cast to uint8 for bus compatibility
 tbl.valid_mat = uint8(tbl.valid_mat);
+tbl.stall_mat = uint8(tbl.stall_mat);
 
 n_fields = length(bus_fields);
 elems(n_fields) = Simulink.BusElement;   % pre-allocate
@@ -110,7 +115,7 @@ for k = 1:n_fields
     e                = Simulink.BusElement;
     e.Name           = bus_fields{k};
     e.DataType       = 'double';
-    if strcmp(bus_fields{k}, 'valid_mat')
+    if any(strcmp(bus_fields{k}, {'valid_mat', 'stall_mat'}))
         e.DataType   = 'uint8';
     end
     e.Dimensions     = size(tbl.(bus_fields{k}));
