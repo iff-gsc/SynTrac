@@ -1,25 +1,33 @@
-% XPROP_REVIEW_DATA  Rebuild both propeller tables and review one of them.
+% XPROP_REVIEW_DATA  Rebuild all propeller tables and review one of them.
 %
 % Run from configuration_2a/. Builds
-%   data/xprop_data.mat      from data/xprop_data.txt      (PropData 'Old')
-%   data/xprop_data_new.mat  from data/xprop_data_new.txt  (PropData 'New')
-% which aircraftSyntracCreate loads via its 'PropData' option.
+%   data/xprop_data.mat          from data/xprop_data.txt      (PropData 'Old')
+%   data/xprop_data_new.mat      from data/xprop_data_new.txt  (PropData 'New')
+% with the XROTOR-based extrapolation beyond zero thrust, and
+%   data/xprop_data_lin.mat, data/xprop_data_new_lin.mat
+% with linear extrapolation (PropExtrap 'Linear'). aircraftSyntracCreate
+% loads them via its 'PropData' and 'PropExtrap' options.
 
 dataset    = 'Old';   % 'Old' or 'New'
+extrap     = 'XROTOR';% 'XROTOR' or 'Linear' (only differs beyond zero thrust)
 hide_stall = true;    % true: surf plots show only valid AND non-stalled nodes
 show_full  = false;   % true: show the complete grid as the solver sees it,
                       %       incl. smoothed fill / extrapolation (NOT data)
 use_units  = true;    % true: axes in J [-] and pitch_delta [deg], false: indices
 
-%% Build both tables
+%% Build all tables
 xprop_build_matfile('data/xprop_data.txt',     'data/xprop_data.mat');
 xprop_build_matfile('data/xprop_data_new.txt', 'data/xprop_data_new.mat');
+xprop_build_matfile('data/xprop_data.txt',     'data/xprop_data_lin.mat',     'linear');
+xprop_build_matfile('data/xprop_data_new.txt', 'data/xprop_data_new_lin.mat', 'linear');
 
 %% Load the selected table
 switch dataset
-    case 'Old'; mat_file = 'data/xprop_data.mat';
-    case 'New'; mat_file = 'data/xprop_data_new.mat';
+    case 'Old'; mat_file = 'data/xprop_data';
+    case 'New'; mat_file = 'data/xprop_data_new';
 end
+if strcmp(extrap, 'Linear'); mat_file = [mat_file '_lin']; end
+mat_file = [mat_file '.mat'];
 tbl = xprop_load_table(mat_file);
 s   = load(mat_file, 'data_mat', 'filled_mat', 'trusted_mat');
 
@@ -56,7 +64,7 @@ for k = 1:length(fields)
     M = tbl.(fields{k});
     M(~show_mat) = NaN;
     surf(X, Y, M)
-    title([titles{k} ' (' dataset ', ' mask_txt ')'])
+    title([titles{k} ' (' dataset ', ' extrap ', ' mask_txt ')'])
     xlabel(x_lbl); ylabel(y_lbl)
     axis tight
     view(-37.5+150, 60);

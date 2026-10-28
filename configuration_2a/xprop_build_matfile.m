@@ -1,20 +1,26 @@
-function xprop_build_matfile(txt_file, mat_file)
+function xprop_build_matfile(txt_file, mat_file, extrap)
 % XPROP_BUILD_MATFILE  Parse XROTOR plain-text data and save a .mat file.
 %
 % Offline preprocessing step — run once after any data change.
 % Computes Ct/Cp grids AND all derivative grids (dCt/dbeta, dCp/dbeta,
 % dCt/dJ, dCp/dJ) at every table node via central finite differences.
 % All grids are complete and smooth over the full table: original XROTOR
-% points are kept exactly, isolated holes are spline-filled, the region
-% beyond zero thrust is filled with a windmill/brake shape in four-quadrant
-% scaling, and all non-trusted nodes are smoothed in 2-D (minimum
-% curvature). valid_mat marks the trustworthy nodes, stall_mat the stalled
+% points are kept exactly, isolated holes are spline-filled, and the region
+% beyond zero thrust is extrapolated with one of two methods (extrap):
+%   'xrotor' : windmill/brake shape in four-quadrant scaling fitted to the
+%              Ct < 0 points of the unfiltered XROTOR run (incl. negative
+%              stall), all non-trusted nodes smoothed in 2-D (minimum
+%              curvature). Default.
+%   'linear' : each J column (fixed airspeed) continued linearly over
+%              pitch, no stall modelled; only untrusted holes are smoothed.
+% valid_mat marks the trustworthy nodes, stall_mat the stalled
 % side of each pitch row. See data/XPROP_TABLE.md.
 % All runtime functions only interpolate — no derivatives computed online.
 %
 % USAGE:
 %   xprop_build_matfile('xprop_data.txt')
 %   xprop_build_matfile('xprop_data.txt', 'xprop_data.mat')
+%   xprop_build_matfile('xprop_data.txt', 'xprop_data_lin.mat', 'linear')
 %
 % INPUT FILE FORMAT (plain text, whitespace-delimited):
 %   Header line:  pitch_delta  V  Ct  Cp  eff  J  [Tc optional, ignored]
@@ -47,10 +53,15 @@ if nargin < 2 || isempty(mat_file)
     [folder, name, ~] = fileparts(txt_file);
     mat_file = fullfile(folder, [name '.mat']);
 end
+if nargin < 3 || isempty(extrap)
+    extrap = 'xrotor';
+end
+extrap = validatestring(extrap, {'xrotor', 'linear'});
 
 fprintf('xprop_build_matfile\n');
 fprintf('  Source : %s\n', txt_file);
 fprintf('  Output : %s\n', mat_file);
+fprintf('  Extrap : %s\n', extrap);
 
 %% ---- Parse text file ----------------------------------------------------
 if ~isfile(txt_file)
@@ -208,10 +219,11 @@ for k = 1:length(fi)
     end
 end
 
-%% ---- Extrapolate beyond zero thrust (windmill / brake prior) ------------
+%% ---- Extrapolate beyond zero thrust -------------------------------------
 % Beyond the last point of a row (Ct -> 0) the propeller enters the
-% windmill and brake states. No delivered data exists there. Instead of a
-% plain linear continuation, each row is continued with a normalised
+% windmill and brake states. No delivered data exists there.
+% extrap = 'linear': see the linear section below.
+% extrap = 'xrotor': each row is continued with a normalised
 % windmill shape in four-quadrant scaling (as used for propeller
 % four-quadrant data):
 %   CT* = 8 Ct / (pi W2),  CP* = 8 Cp / (pi^2 0.7 W2),  W2 = J^2 + (0.7 pi)^2
@@ -247,9 +259,9 @@ for i = 1:n_pitch
             if m == 1; CTs(i,:) = row; else; CPs(i,:) = row; end
         end
     end
-    % High-J side: windmill prior
+    % High-J side: windmill prior ('linear' fills it column-wise below)
     hi = d(end)+1:n_J;
-    if isempty(hi); continue; end
+    if isempty(hi) || strcmp(extrap, 'linear'); continue; end
     L  = d(end);
     k3 = d(end-2:end);
     cT = polyfit(aoa_mat(i,k3), CTs(i,k3), 1);
@@ -267,27 +279,55 @@ for i = 1:n_pitch
     end
 end
 
-%% ---- Smooth all non-trusted nodes in 2-D --------------------------------
-% Trusted nodes stay exactly as they are. All other nodes (untrusted holes
+%% ---- Smooth non-trusted nodes in 2-D / linear extrapolation -------------
+% Trusted nodes stay exactly as they are.
+% extrap = 'xrotor': all other nodes (untrusted holes
 % and the extrapolated region) minimise the squared second differences
 % along J and pitch, so the surfaces and their derivatives join the data
 % smoothly in both directions. Extrapolated nodes are additionally pulled
 % towards the windmill prior (weight w_prior), so the far field follows
 % its shape instead of a plain linear continuation. Done in CT*/CP*.
+%
+% extrap = 'linear': no stall is modelled beyond zero thrust. Each J column
+% (fixed airspeed) is continued linearly over pitch below its lowest data
+% node. The slope is the one of the last data interval, averaged over the
+% neighbouring J columns (3-point moving mean): single-column slopes
+% scatter by about 10 % and would let Ct and Cp rise with J in places,
+% the averaged ones keep both monotonically falling in J (checked for
+% both data sets). Only untrusted holes are smoothed (no prior); the
+% extrapolated nodes are held fixed meanwhile and recomputed afterwards
+% from the smoothed column ends. Plain straight continuation per column
+% (NOT data, none valid).
 w_prior = 0.1;
-free_mat = ~trusted_mat;
-pull_mat = w_prior * double(~inside_mat);
+n_lin   = 2;
 x_J = J_vec / (J_vec(2) - J_vec(1));               % J in units of one step
-CTs = smooth_fill(CTs, x_J, pitch_vec, free_mat, pull_mat);
-CPs = smooth_fill(CPs, x_J, pitch_vec, free_mat, pull_mat);
-Ct_mat(free_mat) = CTs(free_mat) .* pi .* W2_mat(free_mat) / 8;
-Cp_mat(free_mat) = CPs(free_mat) .* pi^2 * 0.7 .* W2_mat(free_mat) / 8;
+switch extrap
+    case 'xrotor'
+        free_mat = ~trusted_mat;
+        pull_mat = w_prior * double(~inside_mat);
+        CTs = smooth_fill(CTs, x_J, pitch_vec, free_mat, pull_mat);
+        CPs = smooth_fill(CPs, x_J, pitch_vec, free_mat, pull_mat);
+    case 'linear'
+        CTs = extrap_linear(CTs, pitch_vec, inside_mat, n_lin);
+        CPs = extrap_linear(CPs, pitch_vec, inside_mat, n_lin);
+        free_mat = ~trusted_mat & inside_mat;
+        pull_mat = zeros(n_pitch, n_J);
+        if any(free_mat(:))
+            CTs = smooth_fill(CTs, x_J, pitch_vec, free_mat, pull_mat);
+            CPs = smooth_fill(CPs, x_J, pitch_vec, free_mat, pull_mat);
+        end
+        CTs = extrap_linear(CTs, pitch_vec, inside_mat, n_lin);
+        CPs = extrap_linear(CPs, pitch_vec, inside_mat, n_lin);
+end
+set_mat = ~trusted_mat;
+Ct_mat(set_mat) = CTs(set_mat) .* pi .* W2_mat(set_mat) / 8;
+Cp_mat(set_mat) = CPs(set_mat) .* pi^2 * 0.7 .* W2_mat(set_mat) / 8;
 
 if any(isnan(Ct_mat(:))) || any(isnan(Cp_mat(:)))
     error('xprop_build_matfile:incompleteGrid', 'Grid still contains NaN after filling.');
 end
-fprintf('  Filled : %d extrapolated cells (windmill prior), %d holes smoothed\n', ...
-        sum(~inside_mat(:)), sum(filled_mat(:) & ~trusted_mat(:)));
+fprintf('  Filled : %d extrapolated cells (%s), %d holes smoothed\n', ...
+        sum(~inside_mat(:)), extrap, sum(filled_mat(:) & ~trusted_mat(:)));
 
 J_mat = J_grid;
 
@@ -385,16 +425,22 @@ meta.grids.filled_mat.desc = 'logical [n_pitch x n_J] — true where a missing i
 meta.grids.note = ['All grids are [n_pitch x n_J]. ' ...
     'Row i = pitch_vec(i), column j = J_vec(j). ' ...
     'All grids are complete (no NaN). Trusted nodes are original XROTOR ' ...
-    'points or isolated spline-filled holes and are never modified. All ' ...
-    'other nodes are minimum-curvature smoothed; beyond zero thrust they ' ...
-    'follow a windmill/brake prior (four-quadrant scaling, shape fitted to ' ...
-    'the Ct<0 points of the unfiltered new XROTOR run). These nodes keep ' ...
-    'the solvers well-behaved and are NOT data. valid_mat is the ' ...
+    'points or isolated spline-filled holes and are never modified. ' ...
+    'Untrusted holes are minimum-curvature smoothed. Beyond zero thrust ' ...
+    'the grid is extrapolated as given in meta.extrapolation. These nodes ' ...
+    'keep the solvers well-behaved and are NOT data. valid_mat is the ' ...
     'authoritative record of which cells are meaningful.'];
-meta.extrapolation.method    = 'windmill prior in CT*/CP* vs geometric AoA at 0.7R + 2-D minimum-curvature smoothing';
-meta.extrapolation.scaling   = 'CT* = 8 Ct/(pi W2), CP* = 8 Cp/(pi^2 0.7 W2), W2 = J^2 + (0.7 pi)^2';
-meta.extrapolation.shape_src = 'xprop_data_new_unfiltered.txt, 118 points with Ct < 0';
-meta.extrapolation.w_prior   = w_prior;
+meta.extrapolation.option = extrap;
+switch extrap
+    case 'xrotor'
+        meta.extrapolation.method    = 'windmill prior in CT*/CP* vs geometric AoA at 0.7R + 2-D minimum-curvature smoothing';
+        meta.extrapolation.scaling   = 'CT* = 8 Ct/(pi W2), CP* = 8 Cp/(pi^2 0.7 W2), W2 = J^2 + (0.7 pi)^2';
+        meta.extrapolation.shape_src = 'xprop_data_new_unfiltered.txt, 118 points with Ct < 0';
+        meta.extrapolation.w_prior   = w_prior;
+    case 'linear'
+        meta.extrapolation.method    = 'linear over pitch per J column (fixed airspeed), no stall modelled';
+        meta.extrapolation.n_lin     = n_lin;
+end
 
 % --- Propeller reference --------------------------------------------------
 meta.prop.D_m          = 2.35;
@@ -424,6 +470,30 @@ fprintf('Done.\n');
 
 end
 
+
+function F = extrap_linear(F, p, inside, n_lin)
+% EXTRAP_LINEAR  Continue each column of F linearly over p below its lowest
+% inside node (value continuous at the edge). Slope per column from a
+% least-squares line through its n_lin lowest inside nodes, then averaged
+% over neighbouring columns (3-point moving mean).
+n_c = size(F, 2);
+sl  = NaN(1, n_c);
+for j = 1:n_c
+    d = find(inside(:, j));
+    if length(d) < n_lin || ~all(diff(d(1:n_lin)) == 1)
+        error('xprop_build_matfile:shortColumn', ...
+              'Column %d has fewer than %d contiguous nodes at its low-pitch end.', j, n_lin);
+    end
+    c = polyfit(p(d(1:n_lin)), F(d(1:n_lin), j), 1);
+    sl(j) = c(1);
+end
+sl = movmean(sl, 3, 'Endpoints', 'shrink');
+for j = 1:n_c
+    d  = find(inside(:, j));
+    lo = 1:d(1)-1;
+    F(lo, j) = F(d(1), j) + sl(j) * (p(lo) - p(d(1)));
+end
+end
 
 function dF = fd_deriv(F, x)
 % FD_DERIV  dF/dx along dim 1 of F on a (possibly non-uniform) grid x.

@@ -2,7 +2,8 @@
 
 Applies to `xprop_data.mat` (data set **Old**) and `xprop_data_new.mat`
 (data set **New**), both built by `xprop_build_matfile.m` from the XROTOR
-text output in this folder. Propeller: D = 2.35 m, 4 blades, 1225 RPM,
+text output in this folder, and to their variants `xprop_data_lin.mat` /
+`xprop_data_new_lin.mat` with linear extrapolation beyond zero thrust. Propeller: D = 2.35 m, 4 blades, 1225 RPM,
 zero pitch 54.7° at r/R = 0.7.
 
 ## Selecting a data set
@@ -10,10 +11,15 @@ zero pitch 54.7° at r/R = 0.7.
 ```matlab
 aircraft = aircraftSyntracCreate();                    % Old (default)
 aircraft = aircraftSyntracCreate('PropData', 'New');   % New
+aircraft = aircraftSyntracCreate('PropData', 'New', 'PropExtrap', 'Linear');
 ```
 
-Both tables use the same grid (31 pitch × 26 J), so the Simulink bus is
-identical. Rebuild and review both tables with `configuration_2a/xprop_review_data.m`.
+`PropExtrap` selects the extrapolation beyond zero thrust: `'XROTOR'`
+(default) or `'Linear'`, see [below](#the-placeholder-beyond-zero-thrust).
+It changes only the extrapolated nodes; data, `valid_mat` and `stall_mat`
+are identical. All tables use the same grid (31 pitch × 26 J), so the
+Simulink bus is identical. Rebuild and review all tables with
+`configuration_2a/xprop_review_data.m`.
 
 ## What the grid contains
 
@@ -27,7 +33,7 @@ valid everywhere.** The nodes fall into these classes:
 | XROTOR data | `data_mat` | delivered XROTOR point, never modified | yes, if `valid_mat` |
 | Trusted hole | `trusted_mat & filled_mat` | single missing point, spline-filled; J- and pitch-spline agree | yes, if `valid_mat` |
 | Untrusted hole | `filled_mat & ~trusted_mat` | larger gap (XROTOR did not converge), minimum-curvature fill | **no** |
-| Extrapolated | `~data_mat & ~filled_mat` | beyond zero thrust: windmill/brake placeholder | **no** |
+| Extrapolated | `~data_mat & ~filled_mat` | beyond zero thrust: placeholder (XROTOR shape or linear) | **no** |
 
 Derivatives are second-order finite differences of the final Ct/Cp grid,
 so values and derivatives are always consistent with each other.
@@ -84,6 +90,11 @@ did not converge just past the stall break and in deep stall.
 
 ## The placeholder beyond zero thrust
 
+Two variants, selected with `PropExtrap` (build option `extrap` of
+`xprop_build_matfile`). Neither is validated data.
+
+### `'XROTOR'` (default): shape of the unfiltered XROTOR run
+
 Each pitch row is continued past its last data point with a windmill/brake
 shape in four-quadrant scaling,
 CT\* = 8 Ct / (π W²), CP\* = 8 Cp / (π² · 0.7 · W²), W² = J² + (0.7π)²,
@@ -100,6 +111,22 @@ The same shape is assumed for the Old data set.
   windmill and brake states (heavily loaded turbine state, negative
   stall). Do not use these values for performance, handling-qualities or
   controller-design results.
+- Shape over pitch at fixed airspeed: right after zero thrust Ct flattens
+  (negative stall, XROTOR stalls the blade almost immediately), then falls
+  more steeply again; Cp first dips slightly below zero (windmill) and then
+  rises again (brake state, drag-dominated stalled blade).
+
+### `'Linear'`: linear over pitch, no stall
+
+Each J column (fixed airspeed) is continued linearly over pitch below its
+lowest data point, with the slope of the last data interval averaged over
+the neighbouring J columns (single-column slopes scatter by about 10 % and
+would let Ct rise with J in places; averaged, Ct and Cp fall monotonically
+in J). No stall is modelled: Ct keeps falling, Cp falls through
+zero into the windmill state and stays there. dCt/dβ and dCp/dβ are
+constant per column in this region. Use this variant when the shape
+should not suggest physics that is not backed by data; mark the region
+as extrapolated (e.g. dashed) in plots.
 
 ## Known limitations and open items
 

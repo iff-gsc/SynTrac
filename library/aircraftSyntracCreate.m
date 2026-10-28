@@ -44,6 +44,12 @@ function aircraft = aircraftSyntracCreate( varargin )
 %                           'Old' (data/xprop_data.mat, default)
 %                           'New' (data/xprop_data_new.mat, updated
 %                                 XROTOR run, filtered)
+%       - 'PropExtrap': extrapolation of the propeller table beyond zero
+%                       thrust (no data there) with options:
+%                           'XROTOR' (shape of the unfiltered XROTOR run
+%                                    incl. negative stall, default)
+%                           'Linear' (linear over pitch, no stall,
+%                                    data/xprop_data*_lin.mat)
 % 
 % Outputs:
 %   aircraft        Aircraft parameters struct (as defined by this function
@@ -65,6 +71,7 @@ default_apply_vi = 1;
 default_apply_swirl = 1;
 default_Ma = 0.4349;
 default_prop_data = 'Old';
+default_prop_extrap = 'XROTOR';
 
 valid_panel_number_wing = @(x) ismember(x, [58, 102, 196]);
 valid_panel_number = @(x) isnumeric(x) && isscalar(x) && (x>1) && (mod(x,1)==0);
@@ -75,6 +82,7 @@ valid_apply_vi = @(x) isnumeric(x) && isscalar(x) && ((x==1) || (x==0));
 valid_apply_swirl = @(x) isnumeric(x) && isscalar(x) && ((x==1) || (x==0));
 valid_Ma = @(x) (x>=0) && (x<=0.8);
 valid_prop_data = @(x) ischar(x) && ismember(x, {'Old','New'});
+valid_prop_extrap = @(x) ischar(x) && ismember(x, {'XROTOR','Linear'});
 
 addParameter(p,'NumPanelWing',default_n_panel_wing,valid_panel_number_wing);
 addParameter(p,'NumPanelHtp',default_n_panel_htp,valid_panel_number);
@@ -87,6 +95,7 @@ addParameter(p,'ApplyVi',default_apply_vi,valid_apply_vi);
 addParameter(p,'ApplySwirl',default_apply_swirl,valid_apply_swirl);
 addParameter(p,'Mach',default_Ma,valid_Ma);
 addParameter(p,'PropData',default_prop_data,valid_prop_data);
+addParameter(p,'PropExtrap',default_prop_extrap,valid_prop_extrap);
 
 parse(p,varargin{:})
 
@@ -148,10 +157,14 @@ end
 
 switch p.Results.PropData
     case 'Old'
-        prop_table = xprop_load_table('data/xprop_data.mat');
+        prop_file = 'data/xprop_data';
     case 'New'
-        prop_table = xprop_load_table('data/xprop_data_new.mat');
+        prop_file = 'data/xprop_data_new';
 end
+if strcmp(p.Results.PropExtrap, 'Linear')
+    prop_file = [prop_file '_lin'];
+end
+prop_table = xprop_load_table([prop_file '.mat']);
 
 %% aerodynamics
 wing_params = wingLoadParameters( 'wing_params_2a' );
