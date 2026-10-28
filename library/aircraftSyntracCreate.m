@@ -134,7 +134,7 @@ elseif strcmp(p.Results.PropConfig, 'Outer')
     prop(7).pos_c = [ -13.186;   +5.604;   -1.833 ];
     prop(8).pos_c = [ -13.186;   +8.236;   -1.833 ];
     prop(9).pos_c = [ -13.186;   +10.868;  -1.833 ];
-    prop(10).pos_c = [ 13.186;  +13.500;  -1.833 ];
+    prop(10).pos_c = [ -13.186;  +13.500;  -1.833 ];
 end
 
 % From A03: The orientation is inward up.

@@ -1,7 +1,12 @@
 function [T, Q, P, vi, v_slipstream, Ct, Cp, J, eff] = ...
-    propeller_aero(tbl, RPM, pitch_delta, V, rho)
+    propeller_aero(tbl, RPM, pitch_delta, V, rho, D)
 
-D = 2.35;   R = D/2;   A = pi*R^2;
+% D: propeller diameter in m (optional, default 2.35 m, the diameter of the
+% XROTOR propeller the table was computed for)
+if nargin < 6
+    D = 2.35;
+end
+R = D/2;   A = pi*R^2;
 n     = RPM / 60;
 omega = n * 2 * pi;
 J     = V / (n * D);

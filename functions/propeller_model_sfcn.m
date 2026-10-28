@@ -15,8 +15,9 @@ function [T, Q, P, vi, v_slipstream, swirls, eff] = ...
     eff          = zeros(n,1);
 
     for i = 1:n
+         Ri = R(min(i, numel(R)));       % R scalar or one value per propeller
          [T(i), Q(i), P(i), vi(i), v_slipstream(i), ~, ~, ~, eff(i)] = ...
-             propeller_aero(tbl, RPM(i), pitch_delta(i), V(i), rho);
+             propeller_aero(tbl, RPM(i), pitch_delta(i), V(i), rho, 2*Ri);
     end
     swirls = inducedSwirl(Q, V(:)+vi, R, rho);
 
