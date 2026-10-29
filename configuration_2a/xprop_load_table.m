@@ -52,7 +52,7 @@ s = load(mat_file);
 
 required = {'pitch_vec','J_vec','J_mat','Ct_mat','Cp_mat', ...
             'dCt_dbeta_mat','dCp_dbeta_mat','dCt_dJ_mat','dCp_dJ_mat', ...
-            'valid_mat', 'stall_mat'};
+            'valid_mat', 'stall_mat','extrap_mat'};
 for k = 1:length(required)
     if ~isfield(s, required{k})
         error('xprop_load_table:missingVar', ...
@@ -79,6 +79,7 @@ tbl.dCt_dJ_mat    = nan0(s.dCt_dJ_mat);
 tbl.dCp_dJ_mat    = nan0(s.dCp_dJ_mat);
 tbl.valid_mat     = s.valid_mat;       
 tbl.stall_mat     = s.stall_mat;
+tbl.extrap_mat    = s.extrap_mat;
 
 tbl_meta = s.meta;
 
@@ -89,7 +90,7 @@ tbl_meta = s.meta;
 
 bus_fields = {'pitch_vec', 'J_vec', 'J_mat', 'Ct_mat', 'Cp_mat', ...
               'dCt_dbeta_mat', 'dCp_dbeta_mat', 'dCt_dJ_mat', 'dCp_dJ_mat', ...
-              'valid_mat', 'stall_mat'};
+              'valid_mat', 'stall_mat', 'extrap_mat'};
 
 bus_descriptions = { ...
     'pitch_delta axis [deg], row index of all _mat grids', ...
@@ -102,11 +103,13 @@ bus_descriptions = { ...
     'dCt/dJ [-], precomputed offline, 0 where no data', ...
     'dCp/dJ [-], precomputed offline, 0 where no data', ...
     'Valid cell mask [uint8]: 1 = value and derivatives from trusted data, 0 = not', ...
-    'Stall mask [uint8]: 1 = stalled side of the pitch row (conservative), 0 = not'};
+    'Stall mask [uint8]: 1 = stalled side of the pitch row (conservative), 0 = not', ...
+    'Extrapolation mask [uint8]: 1 = extrapolated values, 0 = not'};
 
 % valid_mat is logical in MATLAB; cast to uint8 for bus compatibility
 tbl.valid_mat = uint8(tbl.valid_mat);
 tbl.stall_mat = uint8(tbl.stall_mat);
+tbl.extrap_mat = uint8(tbl.extrap_mat);
 
 n_fields = length(bus_fields);
 elems(n_fields) = Simulink.BusElement;   % pre-allocate
@@ -115,7 +118,7 @@ for k = 1:n_fields
     e                = Simulink.BusElement;
     e.Name           = bus_fields{k};
     e.DataType       = 'double';
-    if any(strcmp(bus_fields{k}, {'valid_mat', 'stall_mat'}))
+    if any(strcmp(bus_fields{k}, {'valid_mat', 'stall_mat', 'extrap_mat'}))
         e.DataType   = 'uint8';
     end
     e.Dimensions     = size(tbl.(bus_fields{k}));

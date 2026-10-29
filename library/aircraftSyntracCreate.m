@@ -162,9 +162,21 @@ switch p.Results.PropData
         prop_file = 'data/xprop_data_new';
 end
 if strcmp(p.Results.PropExtrap, 'Linear')
-    prop_file = [prop_file '_lin'];
+    prop_mat_file = [prop_file '_lin'];
+else
+    prop_mat_file = prop_file;
 end
-prop_table = xprop_load_table([prop_file '.mat']);
+try
+    prop_table = xprop_load_table([prop_mat_file '.mat']);
+catch
+    if strcmp(p.Results.PropExtrap, 'Linear')
+        prop_extrap = 'linear';
+    else
+        prop_extrap = 'xrotor';
+    end
+    xprop_build_matfile([prop_file '.txt'], [prop_mat_file '.mat'],prop_extrap);
+    prop_table = xprop_load_table([prop_mat_file '.mat']);
+end
 
 %% aerodynamics
 wing_params = wingLoadParameters( 'wing_params_2a' );
