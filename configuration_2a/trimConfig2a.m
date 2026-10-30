@@ -41,11 +41,14 @@ ic.act.rudder = 0;
 ic.act.prop = zeros(1,10);
 ic.act.htp_trim = 0;
 
+pos_ref = loadParams( 'flightgearRefPos_params_default' );
+pos_ref.alt = h;
 
 % To do: backup and restore base workspace variables
 assignin('base','envir',envir);
 assignin('base','aircraft',aircraft);
 assignin('base','ic',ic);
+assignin('base','pos_ref',pos_ref);
 
 % Compile model
 feval(model_name, [], [], [], 'compile');
