@@ -1,10 +1,13 @@
 clear;
 addPathConfig2a();
 
-% Environmental parameters
-envir = envirLoadParams('envir_params_default','envir',ft2m(22000));
-
+% Define operating point
 V = 136.33;
+h = ft2m(22000);
+
+% Environmental parameters
+envir = envirLoadParams('envir_params_default','envir',h);
+
 Ma = V/envir.atmosphere.a;
 
 % Aircraft parameters
@@ -12,7 +15,7 @@ aircraft = aircraftSyntracCreate('Mach',Ma);
 
 % Reference position
 pos_ref = loadParams( 'flightgearRefPos_params_default' );
-pos_ref.alt = ft2m(22000);
+pos_ref.alt = h;
 
 % Trim aircraft
 [ic,u0,~,lin,lin_red] = trimConfig2a(aircraft, V, pos_ref.alt);
