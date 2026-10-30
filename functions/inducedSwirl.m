@@ -1,4 +1,4 @@
-function omega_s = inducedSwirl(Q, v_disk, R, rho) %#codegen
+function v_t = inducedSwirl(Q, v_disk, R, rho) %#codegen
 % inducedSwirl computes the swirl (rotational induced velocity) of a 
 % propeller wake.
 %
@@ -7,15 +7,14 @@ function omega_s = inducedSwirl(Q, v_disk, R, rho) %#codegen
 %
 %   The computation is based on the momentum theory. The propeller reaction
 %   torque Q is delivered to the slipstream as angular momentum. Assuming
-%   the slipstream rotates as a solid body (w_theta = omega_s * r),
+%   the tangential velocity is constant,
 %   conservation of angular momentum at the disk gives
 %
-%       Q = integral_0^R rho*v_disk*(omega_s*r)*r*(2*pi*r) dr
-%         = (pi/2)*rho*v_disk*omega_s*R^4 ,
+%       Q = 2*pi*rho*v_disk*integral_0^R(v_t,const*r^2) dr
 %
 %   so that
 %
-%       omega_s = 2*Q / (pi*rho*R^4*v_disk) .
+%       v_t,const = 3*Q/(2*pi*rho*R^3*v_disk)
 %
 %   The relation is free of any thrust/power coefficient convention; it
 %   works straight from the torque in N*m. The model is intended for
@@ -72,8 +71,9 @@ function omega_s = inducedSwirl(Q, v_disk, R, rho) %#codegen
 %               (scalar), in kg/m^3
 %
 % Outputs:
-%   omega_s     slipstream angular rate, one value per rotor
-%               (same size as Q), in rad/s
+%   v_t         slipstream tangential velocity assuming a constant radial
+%               distribution, one value per rotor
+%               (same size as Q), in m/s
 %
 % Example:
 %   % --- two rotors, same operating point -------------------------------
@@ -87,9 +87,9 @@ function omega_s = inducedSwirl(Q, v_disk, R, rho) %#codegen
 %   v_disk = V + vi;                 % throughflow at each disk    [m/s]
 %
 %
-%   omega_s = inducedSwirl(Q, v_disk, R, rho);
+%   v_t = inducedSwirl(Q, v_disk, R, rho);
 %
-%   % omega_s        : (2×1) angular rate per rotor         [rad/s]
+%   % v_t        : (2×1) tangential velocity per rotor             [m/s]
 %
 % Notes:
 %   - Q, V and v_i must refer to the same operating point. From
@@ -99,11 +99,6 @@ function omega_s = inducedSwirl(Q, v_disk, R, rho) %#codegen
 %     throughflow V + v_i. v_wing only sets the angle-of-attack conversion;
 %     blend it between V + v_i (at the disk) and V + 2*v_i (far wake) to
 %     place the wing in the developing slipstream.
-%   - Coordinate / sign convention: FRD body frame (x forward, y right,
-%     z down). The function assumes the rotation sense for which the blades
-%     descend on the right side. With r_eval signed (+y right), delta_alpha
-%     comes out correctly signed on both wings. For the opposite rotation
-%     sense, negate r_eval (or negate Q) for that rotor.
 %   - Valid in the normal working state only; the vortex ring state and
 %     reverse flow are not covered.
 %
@@ -119,8 +114,9 @@ R      = R(:);                          % (N×1)
 % guard the disk throughflow against division by zero
 v_disk = sign(v_disk) .* max(abs(v_disk), 1e-6);   % (N×1)
 
-% --- per-rotor slipstream angular rate ------------------------------------
-% omega_s(n) = 2*Q(n) / (pi*rho*R(n)^4*v_disk(n))     (N×1)
-omega_s = 2 * Q ./ (pi * rho * R.^4 .* v_disk);     % (N×1)
+% --- per-rotor equivalent tangential velocity -----------------------------
+
+% for constant swirl
+v_t = 3 * Q ./ (2 * pi * rho * R.^3 .* v_disk);     % (N×1)
 
 end

@@ -1,4 +1,5 @@
 % This script computes the CFD induced drag with lifting line logic
+close all
 
 % Set path
 addPathConfig2a();
@@ -113,7 +114,6 @@ aircraft = aircraftSyntracCreate('NumPanelWing',56*4, 'Kslipstream', 1);
 wing = aircraft.wing_main;
 
 AoA_offset = -0.4; % Offset of LLT compared to CFD
-swirl_factor = 1.4; % Correction factor for swirl
 
 % to match the non-uniform thrust values from CFD results (AOA=3°)
 pitches = [-1.73,-1.31,-1.03,-0.87,-0.64,-0.64,-0.87,-1.03,-1.31,-1.73]; 
@@ -121,7 +121,7 @@ pitches = [-1.73,-1.31,-1.03,-0.87,-0.64,-0.64,-0.87,-1.03,-1.31,-1.73];
 % Run propellers
 
 % Propeller map
-[T, Q, P, vi, v_slipstream, swirls, eff] = ...
+[T, Q, P, vi, v_slipstream, vt, eff] = ...
     propeller_model_sfcn( aircraft.prop_table, [aircraft.prop.RPM], ...
         pitches, repmat(V,size(pitches)), atm.rho, [aircraft.prop.diameter]'/2 );
 
@@ -129,8 +129,8 @@ pitches = [-1.73,-1.31,-1.03,-0.87,-0.64,-0.64,-0.87,-1.03,-1.31,-1.73];
 prop_pos = [aircraft.prop.pos_c];
 prop_y_pos = prop_pos(2,:);
 V_Wb = wingApplySlipstream( wing, prop_y_pos, [aircraft.prop.angle], ...
-    [aircraft.prop.diameter], vi, swirl_factor*[aircraft.prop.dir]'.*swirls, ...
-    [aircraft.prop.k] );
+    [aircraft.prop.diameter], vi, vt, [aircraft.prop.dir], ...
+    [aircraft.prop.k_vi], [aircraft.prop.k_vt]);
 
 
 % Current angle of attack

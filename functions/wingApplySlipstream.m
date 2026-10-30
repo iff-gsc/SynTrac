@@ -1,5 +1,5 @@
 function V_Wb = wingApplySlipstream( wing, prop_y_pos, prop_ang, ...
-                    prop_d, v_i, swirls, k_slip, apply_vi, apply_swirl ) 
+                    prop_d, v_i, v_t, prop_dir, k_vi, k_vt ) 
 % wingApplySlipstream computes the wind at each panel created by propellers
 % in front of the wing. Two effects are considered: Induced velocity and
 % swirl
@@ -12,20 +12,16 @@ function V_Wb = wingApplySlipstream( wing, prop_y_pos, prop_ang, ...
 %                   values mean downward looking propellers (1xN_p array),
 %                   in rad
 %   prop_d          Propeller diameters (1xN_p array), in m
-%   v_i             Induced velocities of each propeller at the propeller
-%                   disk (1xN_p array), in m/s
-%   V               Airspeed at each propeller (1xN_p array), in m/s
-%   rho             Air density (scalar), in kg/m^3
-%   Q               Propeller torques (1xN_p array), in Nm
+%   v_i             Induced axial velocities of each propeller at the 
+%                   propeller disk (1xN_p array), in m/s
+%   v_t             Induced tangential velocities of each propeller at the 
+%                   propeller disk (1xN_p array), in m/s
 %   prop_dir        Propeller directions of rotation (1xN_p array)
 %                       1:  clockwise seen from behind the aircraft
-%                       -1: counter-clockwise seen from behind the wing
-%   k_slip          Scalar contraction factor of slipstream tube that is 
-%                   impacting the wing leading edge (1xN_p array)
-%                   1 corresponds to no contraction; 2 to max. contraction
-%   apply_vi        a value of either 1 or 0 that decides whether axial
+%                      -1: counter-clockwise seen from behind the wing
+%   k_vi            a value of either 1 or 0 that decides whether axial
 %                   slipstream is applied in PWI model
-%   apply_swirl     a value of either 1 or 0 that decides whether
+%   k_vt            a value of either 1 or 0 that decides whether
 %                   tangential slipstream is applied in PWI model
 % 
 % Outputs:
@@ -44,21 +40,27 @@ function V_Wb = wingApplySlipstream( wing, prop_y_pos, prop_ang, ...
 
 V_Wb = zeros(size(wing.state.external.V_Wb));
 r_eval = zeros( 1, size(V_Wb,2) );
-v_i = apply_vi(1)*v_i;
-swirls = apply_swirl(1)*swirls;
+v_i = k_vi(:).*v_i(:);
+v_t = k_vt(:).*v_t(:);
 
 n_props = length(prop_y_pos);
 for i = 1:n_props
-    r_k_slip = 1/sqrt(k_slip(i))*(prop_d(i)/2);
-    y_l = prop_y_pos(i) - r_k_slip;    % y-value left end of slipstream
-    y_r = prop_y_pos(i) + r_k_slip;    % y-value right end of slipstream
+    r_slip = prop_d(i)/2;
+    y_l = prop_y_pos(i) - r_slip;    % y-value left end of slipstream
+    y_r = prop_y_pos(i) + r_slip;    % y-value right end of slipstream
     is_slip = wing.geometry.ctrl_pt.pos(2,:) > y_l & ...
         wing.geometry.ctrl_pt.pos(2,:) < y_r;
-    V_Wb(1,is_slip) = -v_i(i)*k_slip(i)*cos(prop_ang(i));
     r_eval(is_slip) = wing.geometry.ctrl_pt.pos(2,is_slip) - prop_y_pos(i);
-    V_Wb(2,is_slip) = swirls(i)*sqrt(k_slip(i))*r_eval(is_slip)/(prop_d(i)/2);
-    V_Wb(3,is_slip) = swirls(i)*sqrt(k_slip(i))*r_eval(is_slip)/(prop_d(i)/2);
-    V_Wb(3,is_slip) = V_Wb(3,is_slip) + v_i(i)*k_slip(i)*sin(prop_ang(i));
+    
+    % constant swirl distribution
+    vt_signed = sign(r_eval(is_slip))*prop_dir(i)*v_t(i);
+
+    % ~ r/R swirl distribution
+    %vt_signed = 4/3*r_eval(is_slip)*prop_dir(i)*v_t(i)/r_slip
+
+    V_Wb(1,is_slip) = -v_i(i)*cos(prop_ang(i)) + vt_signed*sin(prop_ang(i));
+
+    V_Wb(3,is_slip) = vt_signed*cos(prop_ang(i)) + v_i(i)*sin(prop_ang(i));    
 end
 
 end
