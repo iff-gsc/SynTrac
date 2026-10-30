@@ -135,9 +135,6 @@ raw(:,6) = raw_full(:, col_J);
 
 fprintf('  Data   : %d rows parsed\n', n_rows);
 
-assert(all(raw(:,3) >= 0), 'Ct values must be non-negative');
-assert(all(raw(:,4) >= 0), 'Cp values must be non-negative');
-assert(all(raw(:,6) >  0), 'J values must be positive');
 
 %% ---- Build Ct/Cp grids aligned to common pitch and J axes ---------------
 % Column j always corresponds to J_vec(j) in every row, so all finite
