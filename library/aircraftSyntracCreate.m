@@ -41,9 +41,12 @@ function aircraft = aircraftSyntracCreate( varargin )
 %                           slipstream component is applied to wing inflow
 %                           (default: 1)
 %       - 'PropData':   XROTOR propeller data set with options:
-%                           'Old' (data/xprop_data.mat, default)
+%                           'Old' (data/xprop_data.mat)
 %                           'New' (data/xprop_data_new.mat, updated
 %                                 XROTOR run, filtered)
+%                           'NewUnfilt' (data/xprop_data_new_unfiltered.txt
+%                                 , updated XROTOR run, unfiltered,
+% %                               default)
 %       - 'PropExtrap': extrapolation of the propeller table beyond zero
 %                       thrust (no data there) with options:
 %                           'XROTOR' (shape of the unfiltered XROTOR run
@@ -70,8 +73,8 @@ default_k_slipstream = 1;
 default_apply_vi = 1;
 default_apply_swirl = 1;
 default_Ma = 0.4349;
-default_prop_data = 'Old';
-default_prop_extrap = 'XROTOR';
+default_prop_data = 'NewUnfilt';
+default_prop_extrap = 'Linear';
 
 valid_panel_number_wing = @(x) ismember(x, [58, 102, 196]);
 valid_panel_number = @(x) isnumeric(x) && isscalar(x) && (x>1) && (mod(x,1)==0);
@@ -81,7 +84,7 @@ valid_k_slipstream = @(x) isnumeric(x) && isscalar(x) && (x>=1) && (x<=2);
 valid_apply_vi = @(x) isnumeric(x) && isscalar(x) && ((x==1) || (x==0));
 valid_apply_swirl = @(x) isnumeric(x) && isscalar(x) && ((x==1) || (x==0));
 valid_Ma = @(x) (x>=0) && (x<=0.8);
-valid_prop_data = @(x) ischar(x) && ismember(x, {'Old','New'});
+valid_prop_data = @(x) ischar(x) && ismember(x, {'Old','New','NewUnfilt'});
 valid_prop_extrap = @(x) ischar(x) && ismember(x, {'XROTOR','Linear'});
 
 addParameter(p,'NumPanelWing',default_n_panel_wing,valid_panel_number_wing);
@@ -160,6 +163,8 @@ switch p.Results.PropData
         prop_file = 'data/xprop_data';
     case 'New'
         prop_file = 'data/xprop_data_new';
+    case 'NewUnfilt'
+        prop_file = 'data/xprop_data_new_unfiltered';
 end
 if strcmp(p.Results.PropExtrap, 'Linear')
     prop_mat_file = [prop_file '_lin'];
