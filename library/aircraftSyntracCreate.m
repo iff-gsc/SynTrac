@@ -32,8 +32,6 @@ function aircraft = aircraftSyntracCreate( varargin )
 %                           8)
 %       - 'Mach':           Mach number for computing the influence
 %                           coefficients matrix (default: 0.4349)
-%       - 'KSlipstream':    contraction factor of propeller slipstream 
-%                           (default: 1)
 %       - 'kVi':            factor that scales the axial slipstream 
 %                           velocity 
 %                           (default: 1.3)
@@ -46,7 +44,7 @@ function aircraft = aircraftSyntracCreate( varargin )
 %                                 XROTOR run, filtered)
 %                           'NewUnfilt' (data/xprop_data_new_unfiltered.txt
 %                                 , updated XROTOR run, unfiltered,
-% %                               default)
+%                                 default)
 %       - 'PropExtrap': extrapolation of the propeller table beyond zero
 %                       thrust (no data there) with options:
 %                           'XROTOR' (shape of the unfiltered XROTOR run
@@ -69,7 +67,6 @@ default_n_panel_vtp = 8;
 % default_n_seg_fuse = 15;
 default_mass_case = 'Cruise';
 default_prop_config = 'Inner';
-default_k_slipstream = 1;
 default_k_vi = 1.3;
 default_k_vt = 1.1;
 default_Ma = 0.4349;
@@ -80,7 +77,6 @@ valid_panel_number_wing = @(x) ismember(x, [58, 102, 196]);
 valid_panel_number = @(x) isnumeric(x) && isscalar(x) && (x>1) && (mod(x,1)==0);
 valid_mass_case = @(x) ischar(x) && ismember(x, {'MTOM','OEM','Cruise'});
 valid_prop_config = @(x) ischar(x) && ismember(x, {'Inner','Outer'});
-valid_k_slipstream = @(x) isnumeric(x) && isscalar(x) && (x>=1) && (x<=2);
 valid_k_vi = @(x) isnumeric(x);
 valid_k_vt = @(x) isnumeric(x);
 valid_Ma = @(x) (x>=0) && (x<=0.8);
@@ -93,7 +89,6 @@ addParameter(p,'NumPanelVtp',default_n_panel_vtp,valid_panel_number);
 % addParameter(p,'NumSegFuse',default_n_seg_fuse,valid_panel_number);
 addParameter(p,'MassCase',default_mass_case,valid_mass_case);
 addParameter(p,'PropConfig',default_prop_config,valid_prop_config);
-addParameter(p,'Kslipstream',default_k_slipstream,valid_k_slipstream);
 addParameter(p,'kVi',default_k_vi,valid_k_vi);
 addParameter(p,'kVt',default_k_vt,valid_k_vt);
 addParameter(p,'Mach',default_Ma,valid_Ma);
