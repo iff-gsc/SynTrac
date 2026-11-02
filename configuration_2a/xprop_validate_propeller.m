@@ -230,20 +230,21 @@ v_disk = V_ex + vi;              % throughflow at the disk (sets swirl magnitude
 v_wing = V_ex + (1 + s_dev)*vi;  % velocity the wing sees (AoA conversion)
 
 y = linspace(-R, R, 201);        % spanwise stations, +y = right wing   [m]
-[omega_s, w_theta, delta_alpha] = inducedSwirl(Q, v_disk, v_wing, R, rho_ex, y);
+v_t = inducedSwirl(Q, v_wing, R, rho_ex);
+delta_alpha = v_t/V_ex;
 da_deg = delta_alpha * 180/pi;
 
 figure('Name','Propeller swirl at example point','Position',[650 100 1000 400]);
 
 subplot(1,2,1); hold on; grid on;
-plot(y, w_theta, 'LineWidth', 2.0, 'Color', [0.12 0.37 0.66]);
+plot(y, v_t.*sign(-y), 'LineWidth', 2.0, 'Color', [0.12 0.37 0.66]);
 yline(0,'k:'); xline(0,'k:');
 xlabel('spanwise position  y  [m]   (+y = right wing)');
 ylabel('swirl velocity  w_\theta  [m/s]   (+ = downward)');
 title('Additional (swirl) flow velocity');
 
 subplot(1,2,2); hold on; grid on;
-plot(y, da_deg, 'LineWidth', 2.0, 'Color', [0.75 0.22 0.17]);
+plot(y, da_deg.*sign(-y), 'LineWidth', 2.0, 'Color', [0.75 0.22 0.17]);
 yline(0,'k:'); xline(0,'k:');
 xlabel('spanwise position  y  [m]   (+y = right wing)');
 ylabel('\Delta\alpha  [deg]');

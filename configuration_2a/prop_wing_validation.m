@@ -9,7 +9,7 @@ addPathConfig2a();
 do_write = false;
 
 % Validation angles of attack, in deg
-AoA = [3]; % Available: 0, 0.7, 1, 3 | AOA3 has most available validation data
+AoA = [0.5]; % Available: 0, 0.7, 1, 3 | AOA3 has most available validation data
 AoA_offset = 0; % (not anymore necessary ... Offset of LLT compared to CFD / -0.4 makes a good fit with CFD)
 
 % Aircraft parameters
@@ -173,7 +173,7 @@ for i = 1:length(AoA)
     ylabel('Drag Distribution $dD/dy$ (N/m)', Interpreter='latex')
     legend('Interpreter','latex')
 
-    tikZexp('../../Exports/DragDeco.tex', do_write)
+    writeTikz('../../Exports/DragDeco.tex', do_write)
     
     Total_drag_for_deco_FDM = trapz(y(index:end), distr_drag_for_deco(index:end))
     Total_induced_drag_FDM = trapz(y(index:end), distr_induced_drag(index:end))
@@ -290,7 +290,7 @@ for i = 1:length(AoA)
         grid on
         title({'Delta in lift-loading distribution','at AOA = 3deg (propellers on vs. off)'}, 'Interpreter','latex')
 
-        tikZexp('../../Exports/DiffInLift.tex', do_write)
+        writeTikz('../../Exports/DiffInLift.tex', do_write)
 
         % Plot difference in drag between the all props on vs. off case
         figure(4)
@@ -306,7 +306,7 @@ for i = 1:length(AoA)
         grid on
         title({'Delta in drag-loading distribution','at AOA = 3deg (propellers on vs. off)'}, 'Interpreter','latex')
 
-        tikZexp('../../Exports/DiffInDrag.tex', do_write)
+        writeTikz('../../Exports/DiffInDrag.tex', do_write)
 
         % % Plot difference in Force Z between the all props on vs. off case
         % figure(5)
@@ -381,7 +381,7 @@ legend(Legend{:}, ...
        'Interpreter', 'latex', ...
        'Location', 'south')
 legend show
-tikZexp('../../Exports/LiftLoadDistribution.tex', do_write)
+writeTikz('../../Exports/LiftLoadDistribution.tex', do_write)
 
 figure(2)
 plot(prop_y_pos(end/2+1:end),zeros(size(prop_y_pos(end/2+1:end))),'ko', DisplayName='Pylon positions')
@@ -393,4 +393,4 @@ xlim([1.07,inf])
 %        'Interpreter', 'latex', ...
 %        'Location', 'south')
 %legend show
-tikZexp('../../Exports/DragLoadDistribution.tex', do_write)
+writeTikz('../../Exports/DragLoadDistribution.tex', do_write)

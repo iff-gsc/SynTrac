@@ -108,7 +108,7 @@ legend('Total','Induced (like LL)')
 %% Run lifting line model
 
 % Aircraft parameters
-aircraft = aircraftSyntracCreate('NumPanelWing',56*4, 'Kslipstream', 1);
+aircraft = aircraftSyntracCreate('NumPanelWing',102);
 
 % Extract main wing
 wing = aircraft.wing_main;
