@@ -38,10 +38,22 @@ if do_write
     tikzwidth = '\figurewidth';
     tikzheight = '\figureheight';
     tikzfontsize = '\tikzstyle{every node}=[font=\tikzfontsize]';
+
+    % Get current legend and number of columns
+    lgd = findobj(gcf, 'Type', 'Legend');
+
     extra_axis_options = [{'ylabel style={font=\tikzfontsize}','ylabel near ticks',...
         'xlabel style={font=\tikzfontsize}','legend style={font=\tikzfontsize}'},...
         options];
+
+    if ~isempty(lgd)
+        nCols = lgd(1).NumColumns;
+        extra_axis_options{end+1} = ...
+            sprintf('legend columns=%d', nCols);
+    end
+
     matlab2tikz(filename,'width',tikzwidth,'height',tikzheight, ...
-        'extraCode',tikzfontsize,'extraAxisOptions',extra_axis_options);
+        'extraCode',tikzfontsize,'extraAxisOptions',extra_axis_options, ...
+        'showInfo', false);
 end
 end
