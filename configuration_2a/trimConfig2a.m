@@ -1,11 +1,13 @@
-function [ic,u0,infostruct,lin,lin_red] = trimConfig2a(aircraft,V,h)
+function [ic,u0,infostruct,lin,lin_red] = trimConfig2a(aircraft,V,h,n)
 % trimConfig2a trims configuration 2a for given airspeed and altitude.
 %   Flight condition is straight horizontal flight.
+%   Optionally, a load factor can be specified.
 % 
 % Inputs:
 %   aircraft            aircraft parameters struct, see aircraftCreate
 %   V                   Airspeed (scalar), in m/s
 %   h                   Altitude (scalar), in m
+%   n                   (Optional) Load factor (scalar), in - (default: 1)
 % 
 % Outputs:
 %   ic                  Initial conditions struct for Syntrac Configuration
@@ -24,6 +26,10 @@ function [ic,u0,infostruct,lin,lin_red] = trimConfig2a(aircraft,V,h)
 % Simulink model used for trimming
 model_name = 'sim_config2a_trim';
 
+if nargin < 4
+    n = 1;
+end
+q = (n-1)*9.81/V;
 
 % Environmental parameters
 envir = envirLoadParams('envir_params_default','envir',h);
@@ -77,9 +83,8 @@ num_states = num_cont_states + num_disc_states;
 
 
 % Definition of the trim problem using Simulink block names
-init_states = {'q_bg(1)'};
-init_states_val = [1];
-
+given_states = {'q_bg(1)','rates(2)'};
+given_states_val = [1,q];
 trim_states = {'q_bg(3)','V__Kb(1)','V__Kb(3)','elevator/A','elevator/dot_A',...
     'Props pitch/A(1:10)','Props pitch/dot_A(1:10)','Downwash'};
 trim_states_val = [0,V,0,0,0,deg2rad(max(-15,-15+(V-80)/100*18))*ones(1,10),zeros(1,10),0];
@@ -92,7 +97,7 @@ known_outputs = {'Airspeed','Climb Rate'};
 known_outputs_val = [V,0];
 
 % Get indices of blocks in state, input, derivatives, and output vector
-i_x0 = getBlockIdx(state_names,init_states);
+i_x0 = getBlockIdx(state_names,given_states);
 i_x = getBlockIdx(state_names,trim_states);
 i_u = getBlockIdx(input_names,trim_inputs);
 i_d = getBlockIdx(state_names,known_derivs);
@@ -101,7 +106,7 @@ i_y = getBlockIdx(output_names,known_outputs);
 % Assign trim conditions to state, input, derivatives, and output vector
 x = zeros(num_states,1);
 x(i_x) = trim_states_val;
-x(i_x0) = init_states_val;
+x(i_x0) = given_states_val;
 u = zeros(num_inputs,1);
 u(i_u) = trim_inputs_val;
 d = zeros(num_cont_states,1);
@@ -194,7 +199,7 @@ ic.q_bg = [1;0;x_tr(getBlockIdx(state_names,{'q_bg(3)'}));0];
 ic.V_Kb = [ x_tr(getBlockIdx(state_names,{'V__Kb(1)'})); 0; ...
     x_tr(getBlockIdx(state_names,{'V__Kb(3)'})) ];
 ic.s_Kg = [0; 0; 0];
-ic.omega_Kb = [0; 0; 0];
+ic.omega_Kb = [0; x_tr(getBlockIdx(state_names,{'rates(2)'})); 0];
 % Initial conditions of actuators
 ic.act.aileron = [0,0];
 ic.act.elevator = x_tr(getBlockIdx(state_names,{'elevator/A'}));
