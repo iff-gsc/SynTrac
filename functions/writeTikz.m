@@ -54,6 +54,19 @@ if do_write
 
     matlab2tikz(filename,'width',tikzwidth,'height',tikzheight, ...
         'extraCode',tikzfontsize,'extraAxisOptions',extra_axis_options, ...
-        'showInfo', false);
+        'strict', true, 'showInfo', false);
+
+    % Change line width and marker size by post-processing the .tex file
+    content = fileread(filename);
+    content = regexprep(content, ...
+        'mark size=[0-9.]+pt', ...
+        'mark size=\\tikzmarkersize');
+    content = regexprep(content, ...
+        'line width=[0-9.]+pt', ...
+        'line width=\\tikzlinewidth');
+    fid = fopen(filename, 'w');
+    fprintf(fid, '%s', content);
+    fclose(fid);
+
 end
 end
