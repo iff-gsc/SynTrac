@@ -4,6 +4,9 @@
 % be re-compiled when the Mach number changes (but only if that Mach number
 % has not been used before).
 
+clear;
+addPathConfig2a();
+
 %% Define sweep
 
 % Chose variable to change (V: Velocity, h: Altitude, n: Load factor)
@@ -23,25 +26,29 @@ V = 136.33;       % Velocity (m/s)
 h = ft2m(22000);  % Altitude (m)
 n = 1;            % Load factor
 
+% Zero-lift angle of attack (deg)
+alpha_0 = -6.795;
+
 % Set flag to export figures to Tikz
 write_tikz = true;                             
 
 
 %% Run sweep computation
 
-aircraft = aircraftSyntracCreate();
 clear lin_r;
-clear T;
+clear alpha;
+clear rho;
 switch x_name
     case 'V'
         x_unit = 'm/s';
         x_var = V_vec;
+        atm = isAtmosphere(h);
         for i = 1:length(V_vec)
-            atm = isAtmosphere(h);
             Ma = V_vec(i)/atm.a;
             aircraft = aircraftSyntracCreate('Mach',Ma);
             [ic,u0,~,lin,lin_r(i)] = trimConfig2a(aircraft, V_vec(i), h);
-            [T(i)] = propeller_aero(aircraft.prop_table, 1225, ic.act.prop(1)*180/pi, V_vec(i), atm.rho);
+            alpha(i) = rad2deg(aeroAngles(ic.V_Kb));
+            rho(i) = atm.rho;
         end
     case 'h'
         x_unit = 'ft';
@@ -51,26 +58,43 @@ switch x_name
             Ma = V_vec(i)/atm.a;
             aircraft = aircraftSyntracCreate('Mach',Ma);
             [ic,u0,~,lin,lin_r(i)] = trimConfig2a(aircraft, V, h_vec(i));
-            [T(i)] = propeller_aero(aircraft.prop_table, 1225, ic.act.prop(1)*180/pi, V, atm.rho);
+            alpha(i) = rad2deg(aeroAngles(ic.V_Kb));
+            rho(i) = atm.rho;
         end
     case 'n'
         x_unit = '';
         x_var = n_vec;
+        aircraft = aircraftSyntracCreate();
+        atm = isAtmosphere(h);
         for i = 1:length(n_vec)
-            [ic,u0,~,lin,lin_r(i)] = trimConfig2a(aircraft, V, pos_ref.alt,n_vec(i));
-            [T(i)] = propeller_aero(aircraft.prop_table, 1225, ic.act.prop(1)*180/pi, V, atm.rho);
+            [ic,u0,~,lin,lin_r(i)] = trimConfig2a(aircraft, V, h, n_vec(i));
+            alpha(i) = rad2deg(aeroAngles(ic.V_Kb));
+            rho(i) = atm.rho;
         end
 end
 
+Dalpha = alpha - alpha_0;
 
 %% Plot results
 
 du_dtheta = 1/30;
 
+Lgd = {};
 figure
 hold on
 for i = 1:length(lin_r)
-    plot(du_dtheta*lin_r(i).D(4,5:end),'D-','DisplayName',['$',x_name,'=',num2str(x_var(i)),'\,$',x_unit]);
+    Lgd_var = ['$',x_name,'=\,',num2str(x_var(i)),'\,$',x_unit];
+    Lgd_alpha = ['$\alpha - \alpha_0=\,$',num2str(round(Dalpha(i),1)),'$^\circ$'];
+    Lgd_rho = ['$\rho=\,$',num2str(round(rho(i),2)),'\,kg/m$^3$'];
+    switch x_name
+        case 'V'
+            Lgd{i} = [Lgd_var, '\,\,(',Lgd_alpha,')'];
+        case 'h'
+            Lgd{i} = [Lgd_var, '\,\,(',Lgd_rho,',\,\,',Lgd_alpha,')'];
+        case 'n'
+            Lgd{i} = [Lgd_var, '\,\,(',Lgd_alpha,')'];
+    end
+    plot(du_dtheta*lin_r(i).D(4,5:end),'D-','DisplayName',Lgd{i});
 end
 h = gca;
 ylim([0,h.YLim(2)])
@@ -85,10 +109,10 @@ writeTikz(['exports/ForwardEff_',x_name,'.tex'], write_tikz)
 figure
 hold on
 for i = 1:length(lin_r)
-    plot(du_dtheta*lin_r(i).D(3,5:end),'D-','DisplayName',['$',x_name,'=',num2str(x_var(i)),'\,$',x_unit]);
+    plot(du_dtheta*lin_r(i).D(3,5:end),'D-','DisplayName',Lgd{i});
 end
 grid on
-yline(0, '-', 'Color',0.5*[1,1,1]);
+yline(0, '-', 'Color', 0.5*[1,1,1], 'HandleVisibility', 'off');
 box on
 xlabel('Propellers')
 ylabel('Yaw effectiveness ((rad/s^2)/°)')
@@ -98,7 +122,7 @@ writeTikz(['exports/YawEff_',x_name,'.tex'], write_tikz)
 figure
 hold on
 for i = 1:length(lin_r)
-    plot(du_dtheta*-lin_r(i).D(6,5:end),'D-','DisplayName',['$',x_name,'=',num2str(x_var(i)),'\,$',x_unit]);
+    plot(du_dtheta*-lin_r(i).D(6,5:end),'D-','DisplayName',Lgd{i});
 end
 h = gca;
 ylim([0,h.YLim(2)])
@@ -112,10 +136,10 @@ writeTikz(['exports/UpwardEff_',x_name,'.tex'], write_tikz)
 figure
 hold on
 for i = 1:length(lin_r)
-    plot(du_dtheta*lin_r(i).D(1,5:end),'D-','DisplayName',['$',x_name,'=',num2str(x_var(i)),'\,$',x_unit]);
+    plot(du_dtheta*lin_r(i).D(1,5:end),'D-','DisplayName',Lgd{i});
 end
 grid on
-yline(0, '-', 'Color',0.5*[1,1,1]);
+yline(0, '-', 'Color', 0.5*[1,1,1], 'HandleVisibility', 'off');
 box on
 xlabel('Propellers')
 ylabel('Roll effectiveness ((m/s^2)/°)')
